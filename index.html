@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel 360° · CJ Home Center</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    --azul:#3787B8; --azul-cl:#EAF3F9; --verde:#10822F; --verde-cl:#E7F4EA; --verde-med:#36A862;
+    --cinza:#5B5B5B; --texto:#22272B; --suave:#6B7280; --borda:#E3E7EB; --fundo:#F3F6F8; --branco:#fff;
+    --verm:#D9534F; --amar:#E6A23C; --raio:14px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Montserrat',system-ui,sans-serif;background:var(--fundo);color:var(--texto);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  header{background:var(--branco);border-bottom:1px solid var(--borda);position:sticky;top:0;z-index:20}
+  .top{max-width:1200px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .top svg{height:36px;width:auto}
+  .top .tt{flex:1;min-width:160px}
+  .top .tt b{display:block;font-size:15px}
+  .top .tt small{color:var(--suave);font-size:12px}
+  .btn{font:inherit;font-weight:700;font-size:13px;border-radius:10px;padding:9px 14px;border:1.5px solid var(--borda);background:var(--branco);color:var(--texto);cursor:pointer}
+  .btn.pri{background:var(--verde);border-color:var(--verde);color:#fff}
+  main{max-width:1200px;margin:0 auto;padding:20px 16px 60px}
+  .grid{display:grid;gap:14px}
+  .kpis{grid-template-columns:repeat(4,1fr)}
+  .duas{grid-template-columns:1.3fr 1fr}
+  .card{background:var(--branco);border:1px solid var(--borda);border-radius:var(--raio);padding:18px;min-width:0}
+  .card h3{margin:0 0 2px;font-size:16px}
+  .card .sub{color:var(--suave);font-size:13px;margin:0 0 14px}
+  .kpi small{display:block;color:var(--suave);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+  .kpi b{display:block;font-size:30px;font-weight:800;line-height:1.2;margin-top:4px}
+  .kpi span{font-size:12.5px;color:var(--suave)}
+  section{margin-top:14px}
+  .bar{height:10px;background:var(--borda);border-radius:99px;overflow:hidden}
+  .bar i{display:block;height:100%;background:linear-gradient(90deg,var(--azul),var(--verde))}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+  .chip{font-size:12.5px;font-weight:600;padding:5px 10px;border-radius:99px;background:var(--fundo);color:var(--suave)}
+  .chip.ok{background:var(--verde-cl);color:var(--verde)}
+  .tabela{overflow-x:auto}
+  table{width:100%;border-collapse:separate;border-spacing:3px;font-size:13px}
+  th{font-size:11.5px;font-weight:700;color:var(--suave);text-align:center;padding:6px 4px;vertical-align:bottom;cursor:pointer;user-select:none;white-space:nowrap}
+  th:first-child{text-align:left}
+  td{text-align:center;padding:9px 6px;border-radius:8px;font-weight:700}
+  td.nome{text-align:left;font-weight:600;white-space:nowrap;background:var(--fundo);cursor:pointer}
+  tr:hover td.nome{background:var(--azul-cl)}
+  td.lock{color:var(--suave);font-weight:500;font-size:12px;background:var(--fundo)}
+  .lista{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+  .lista li{background:var(--fundo);border-radius:10px;padding:10px 12px;font-size:13.5px}
+  .lista.pos li{border-left:3px solid var(--verde)}
+  .lista.neg li{border-left:3px solid var(--amar)}
+  .vazio{color:var(--suave);font-size:13px;font-style:italic}
+  .enps{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+  .enps .num{font-size:52px;font-weight:800;line-height:1}
+  .zona{display:inline-block;font-size:12px;font-weight:700;padding:4px 10px;border-radius:99px}
+  .empilhada{display:flex;height:26px;border-radius:8px;overflow:hidden;margin:14px 0 6px;font-size:11.5px;font-weight:700;color:#fff}
+  .empilhada div{display:grid;place-items:center;min-width:0}
+  .legenda{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--suave)}
+  .legenda i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .insights{display:grid;gap:8px;margin:0;padding:0;list-style:none}
+  .insights li{font-size:13.5px;padding:10px 12px;border-radius:10px;background:var(--azul-cl)}
+  .insights li.alerta{background:#FFF4E5}
+  canvas{max-width:100%}
+  .login{max-width:380px;margin:12vh auto 0}
+  .login input{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--borda);border-radius:10px;padding:12px;margin:12px 0}
+  .erro{color:#C2410C;font-weight:600;font-size:13px;min-height:20px}
+  .spin{width:34px;height:34px;border:3px solid var(--borda);border-top-color:var(--azul);border-radius:50%;margin:60px auto;animation:g 1s linear infinite}
+  @keyframes g{to{transform:rotate(360deg)}}
+  .modal{position:fixed;inset:0;background:rgba(20,30,40,.45);display:flex;align-items:flex-start;justify-content:center;padding:30px 12px;overflow-y:auto;z-index:50}
+  .modal[hidden]{display:none}
+  .modal .card{max-width:860px;width:100%;position:relative}
+  .fechar{position:absolute;top:12px;right:12px}
+  .mini{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+  .mini div{background:var(--fundo);border-radius:10px;padding:10px 12px}
+  .mini small{display:block;color:var(--suave);font-size:11.5px;font-weight:600}
+  .mini b{font-size:22px}
+  .demo{background:#FFF7E0;color:#8A6100;font-size:12px;font-weight:600;text-align:center;padding:6px}
+  .dif-pos{color:var(--verde)} .dif-neg{color:#C2410C}
+  @media (max-width:900px){ .kpis{grid-template-columns:repeat(2,1fr)} .duas{grid-template-columns:1fr} }
+  @media (max-width:480px){ .kpi b{font-size:24px} .mini{grid-template-columns:1fr 1fr} .top .tt small{display:none} }
+</style>
+</head>
+<body>
+<div id="demo" class="demo" hidden>Modo demonstração — dados fictícios</div>
+<header id="hdr" hidden>
+  <div class="top">
+    <svg viewBox="130 320 820 440" role="img" aria-label="CJ Home Center">
+      <path fill="#3787B8" d="M352,328 A212,212 0 1,0 501.9,689.9 L465.1,653.1 A160,160 0 1,1 352,380 Z"/>
+      <path fill="#10822F" d="M405,335 L457,356 L457,540 A105,105 0 0,1 247,540 L300,540 A52.5,52.5 0 0,0 405,540 Z"/>
+      <g style="mix-blend-mode:multiply">
+        <polygon fill="#3787B8" points="509,468 596,549 509,630"/>
+        <polygon fill="#36A862" points="509,408 596,489 509,570" opacity=".9"/>
+        <polygon fill="#10822F" points="509,347 596,429 509,510" opacity=".95"/>
+      </g>
+      <text x="630" y="470" font-family="Montserrat,sans-serif" font-weight="800" font-size="76" fill="#5B5B5B" letter-spacing="2">HOME</text>
+      <text x="628" y="546" font-family="Montserrat,sans-serif" font-weight="300" font-size="76" fill="#5B5B5B" letter-spacing="2">CENTER</text>
+    </svg>
+    <div class="tt"><b>Painel da Avaliação 360°</b><small id="atualizado">—</small></div>
+    <button class="btn" id="btnAtualizar">Atualizar</button>
+    <button class="btn" id="btnSair">Sair</button>
+  </div>
+</header>
+<main id="app"><div class="spin"></div></main>
+
+<div class="modal" id="modal" hidden><div class="card" id="detalhe"></div></div>
+
+<script>
+/* ============ CONFIGURAÇÃO ============ */
+const API_URL = 'https://script.google.com/macros/s/AKfycbzwOspQH4EA1jXqMueAai4FOA9wP8rxhqI3GvBpyqk8P8elzYZj8Gbv0z88ErNa33gh/exec'; // mesma URL /exec do formulário
+const ATUALIZAR_A_CADA_SEG = 60;
+/* ===================================== */
+
+const qs = new URLSearchParams(location.search);
+const DEMO = qs.has('demo') || !/^https:\/\/script\.google\.com\//.test(API_URL);
+const $ = s => document.querySelector(s);
+const app = $('#app');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const f1 = v => v==null ? '—' : Number(v).toFixed(1).replace('.',',');
+const charts = {};
+let DADOS = null, ordem = {col:'media', dir:-1}, timer = null;
+
+Chart.defaults.font.family = 'Montserrat, sans-serif';
+Chart.defaults.color = '#6B7280';
+
+/* ---------- Sessão ---------- */
+const getSenha = () => { try{ return sessionStorage.getItem('cj360_senha'); }catch(e){ return null; } };
+const setSenha = s => { try{ s==null ? sessionStorage.removeItem('cj360_senha') : sessionStorage.setItem('cj360_senha', s); }catch(e){} };
+
+function telaLogin(erro){
+  $('#hdr').hidden = true; clearInterval(timer);
+  app.innerHTML = `<div class="card login">
+    <h3>Painel da Avaliação 360°</h3><p class="sub">CJ Home Center · acesso restrito</p>
+    <form id="fl"><input type="password" id="senha" placeholder="Senha do painel" autocomplete="current-password"><button class="btn pri" style="width:100%;padding:12px">Entrar</button></form>
+    <div class="erro">${esc(erro||'')}</div></div>`;
+  $('#fl').onsubmit = ev => { ev.preventDefault(); setSenha($('#senha').value); carregar(true); };
+}
+
+/* ---------- Dados ---------- */
+async function buscar(){
+  if (DEMO) return gerarDemo();
+  const r = await fetch(API_URL + '?acao=painel&senha=' + encodeURIComponent(getSenha()||''));
+  return r.json();
+}
+async function carregar(primeira){
+  if (!DEMO && !getSenha()) return telaLogin();
+  if (primeira) app.innerHTML = '<div class="spin"></div>';
+  try{
+    const d = await buscar();
+    if (!d.ok){ setSenha(null); return telaLogin(d.erro); }
+    DADOS = d; $('#hdr').hidden = false; render();
+    if (primeira){ clearInterval(timer); timer = setInterval(()=>{ if(!document.hidden) carregar(false); }, ATUALIZAR_A_CADA_SEG*1000); }
+  }catch(e){
+    if (primeira) telaLogin('Não foi possível conectar ao servidor.');
+  }
+}
+
+/* ---------- Cores ---------- */
+function corNota(v){
+  if (v==null) return 'background:var(--fundo);color:var(--suave)';
+  const h = Math.max(0, Math.min(120, (v-1.5)/3.2*120));
+  return `background:hsl(${h},62%,86%);color:hsl(${h},55%,24%)`;
+}
+function zonaENPS(n){
+  if (n>=76) return ['Zona de excelência','#E7F4EA','#10822F'];
+  if (n>=51) return ['Zona de qualidade','#EAF3F9','#2A6C94'];
+  if (n>=1)  return ['Zona de aperfeiçoamento','#FFF4E5','#9A5B00'];
+  return ['Zona crítica','#FDECEA','#B42318'];
+}
+function desenhar(id, cfg){ if (charts[id]) charts[id].destroy(); const el = document.getElementById(id); if (el) charts[id] = new Chart(el, cfg); }
+
+/* ---------- Render ---------- */
+function render(){
+  const d = DADOS, comps = d.competencias, P = d.pessoas, E = d.empresa;
+  $('#atualizado').textContent = 'Atualizado às ' + new Date(d.atualizadoEm).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) + ` · atualiza a cada ${ATUALIZAR_A_CADA_SEG}s`;
+  const pct = Math.round(d.adesao.responderam / d.adesao.total * 100);
+  const liberadas = P.filter(p=>p.liberado);
+  const mediaEquipe = liberadas.length ? liberadas.reduce((a,p)=>a+p.mediaOutros,0)/liberadas.length : null;
+  const totalAval = P.reduce((a,p)=>a+p.recebidas,0);
+
+  // Insights
+  const eqOk = d.equipe.filter(c=>c.outros!=null).sort((a,b)=>b.outros-a.outros);
+  const ins = [];
+  if (eqOk.length){
+    ins.push(`<li><b>Ponto mais forte da equipe:</b> ${esc(eqOk[0].nome)} (${f1(eqOk[0].outros)}).</li>`);
+    ins.push(`<li class="alerta"><b>Maior oportunidade de desenvolvimento:</b> ${esc(eqOk[eqOk.length-1].nome)} (${f1(eqOk[eqOk.length-1].outros)}).</li>`);
+  }
+  const gaps = liberadas.filter(p=>p.mediaAuto!=null).map(p=>({nome:p.nome, g:p.mediaAuto-p.mediaOutros}));
+  const sobre = gaps.filter(x=>x.g>=0.75).sort((a,b)=>b.g-a.g);
+  const sub = gaps.filter(x=>x.g<=-0.75).sort((a,b)=>a.g-b.g);
+  if (sobre.length) ins.push(`<li class="alerta"><b>Se avaliam acima da percepção dos colegas:</b> ${sobre.map(x=>esc(x.nome)+' (+'+f1(x.g)+')').join(', ')}. Bom ponto para conversas de alinhamento.</li>`);
+  if (sub.length) ins.push(`<li><b>Se avaliam abaixo do que os colegas percebem:</b> ${sub.map(x=>esc(x.nome)+' ('+f1(x.g)+')').join(', ')}. Vale reforçar o reconhecimento.</li>`);
+  if (!ins.length) ins.push(`<li>Os destaques aparecem conforme as respostas chegam.</li>`);
+
+  // Tabela
+  const linhas = P.slice().sort((a,b)=>{
+    const va = ordem.col==='nome' ? a.nome : ordem.col==='media' ? (a.mediaOutros??-1) : (a.outros[ordem.col]??-1);
+    const vb = ordem.col==='nome' ? b.nome : ordem.col==='media' ? (b.mediaOutros??-1) : (b.outros[ordem.col]??-1);
+    return (va>vb?1:va<vb?-1:0) * ordem.dir;
+  });
+  const seta = c => ordem.col===c ? (ordem.dir>0?' ▲':' ▼') : '';
+  const tabela = `<table><thead><tr>
+      <th data-o="nome">Colaborador${seta('nome')}</th>
+      ${comps.map(c=>`<th data-o="${c.id}" title="${esc(c.nome)}">${esc(c.nome.split(' ')[0])}${seta(c.id)}</th>`).join('')}
+      <th data-o="media">Média${seta('media')}</th><th>Auto</th></tr></thead><tbody>
+    ${linhas.map(p=>`<tr data-p="${esc(p.nome)}"><td class="nome">${esc(p.nome)}</td>
+      ${p.liberado
+        ? comps.map(c=>`<td style="${corNota(p.outros[c.id])}">${f1(p.outros[c.id])}</td>`).join('') + `<td style="${corNota(p.mediaOutros)}">${f1(p.mediaOutros)}</td>`
+        : `<td class="lock" colspan="${comps.length+1}">🔒 aguardando avaliações (${p.recebidas}/${d.minimo})</td>`}
+      <td style="${corNota(p.mediaAuto)}">${f1(p.mediaAuto)}</td></tr>`).join('')}
+    </tbody></table>`;
+
+  // Empresa
+  let empresaHTML;
+  if (E.liberado){
+    const [zn, zb, zc] = zonaENPS(E.enps); const t = E.respostas;
+    empresaHTML = `<div class="grid duas">
+      <div class="card"><h3>eNPS — recomendaria a CJ para trabalhar?</h3><p class="sub">${t} respostas · promotores (9–10) menos detratores (0–6)</p>
+        <div class="enps"><div class="num">${E.enps>0?'+':''}${E.enps}</div><span class="zona" style="background:${zb};color:${zc}">${zn}</span></div>
+        <div class="empilhada">
+          ${E.detratores?`<div style="flex:${E.detratores};background:var(--verm)">${Math.round(E.detratores/t*100)}%</div>`:''}
+          ${E.neutros?`<div style="flex:${E.neutros};background:var(--amar)">${Math.round(E.neutros/t*100)}%</div>`:''}
+          ${E.promotores?`<div style="flex:${E.promotores};background:var(--verde)">${Math.round(E.promotores/t*100)}%</div>`:''}
+        </div>
+        <div class="legenda"><span><i style="background:var(--verm)"></i>Detratores ${E.detratores}</span><span><i style="background:var(--amar)"></i>Neutros ${E.neutros}</span><span><i style="background:var(--verde)"></i>Promotores ${E.promotores}</span></div>
+        <div style="height:150px;margin-top:14px"><canvas id="cHist"></canvas></div>
+      </div>
+      <div class="card"><h3>Clima interno</h3><p class="sub">Média de concordância (1 a 5)</p>
+        <div style="height:260px"><canvas id="cItens"></canvas></div></div>
+    </div>
+    <div class="grid duas" style="margin-top:14px">
+      <div class="card"><h3>O que a CJ faz de melhor</h3><p class="sub">${E.melhor.length} comentários</p>${listar(E.melhor,'pos')}</div>
+      <div class="card"><h3>O que a CJ deveria mudar</h3><p class="sub">${E.mudar.length} comentários</p>${listar(E.mudar,'neg')}</div>
+    </div>`;
+  } else {
+    empresaHTML = `<div class="card"><p class="vazio">🔒 Os resultados sobre a empresa aparecem a partir de ${d.minimo} respostas (${E.respostas} até agora).</p></div>`;
+  }
+
+  app.innerHTML = `
+    <div class="grid kpis">
+      <div class="card kpi"><small>Adesão</small><b>${pct}%</b><span>${d.adesao.responderam} de ${d.adesao.total} colaboradores</span></div>
+      <div class="card kpi"><small>Média da equipe</small><b>${f1(mediaEquipe)}</b><span>na visão dos colegas (1–5)</span></div>
+      <div class="card kpi"><small>eNPS</small><b>${E.liberado?(E.enps>0?'+':'')+E.enps:'—'}</b><span>${E.liberado?zonaENPS(E.enps)[0]:'aguardando respostas'}</span></div>
+      <div class="card kpi"><small>Avaliações</small><b>${totalAval}</b><span>entre colegas recebidas</span></div>
+    </div>
+    <section class="card"><h3>Adesão</h3><p class="sub">Quem já concluiu (as respostas continuam anônimas)</p>
+      <div class="bar"><i style="width:${pct}%"></i></div>
+      <div class="chips">${P.slice().sort((a,b)=>b.respondeu-a.respondeu||a.nome.localeCompare(b.nome)).map(p=>`<span class="chip ${p.respondeu?'ok':''}">${p.respondeu?'✓ ':''}${esc(p.nome)}</span>`).join('')}</div>
+    </section>
+    <section class="grid duas">
+      <div class="card"><h3>Competências da equipe</h3><p class="sub">Como a equipe se vê × como os colegas avaliam</p><div style="height:300px"><canvas id="cEquipe"></canvas></div></div>
+      <div class="card"><h3>Destaques automáticos</h3><p class="sub">Leitura rápida para a liderança</p><ul class="insights">${ins.join('')}</ul></div>
+    </section>
+    <section class="card"><h3>Mapa por colaborador</h3><p class="sub">Média dos colegas por competência · clique no nome para ver o detalhe e os comentários · clique no título da coluna para ordenar</p>
+      <div class="tabela">${tabela}</div></section>
+    <section><h3 style="margin:22px 0 10px;font-size:18px">Clima e marca empregadora</h3>${empresaHTML}</section>`;
+
+  desenhar('cEquipe', {type:'bar', data:{labels:comps.map(c=>c.nome), datasets:[
+      {label:'Autoavaliação', data:d.equipe.map(c=>c.auto), backgroundColor:'#3787B8', borderRadius:6},
+      {label:'Colegas', data:d.equipe.map(c=>c.outros), backgroundColor:'#10822F', borderRadius:6}]},
+    options:{indexAxis:'y', maintainAspectRatio:false, scales:{x:{min:0,max:5,ticks:{stepSize:1}}}, plugins:{legend:{position:'bottom'}}}});
+  if (E.liberado){
+    desenhar('cHist', {type:'bar', data:{labels:[...Array(11).keys()], datasets:[{data:E.histograma,
+        backgroundColor:[...Array(11).keys()].map(v=>v<=6?'#D9534F':v<=8?'#E6A23C':'#10822F'), borderRadius:4}]},
+      options:{maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{y:{ticks:{stepSize:1},beginAtZero:true}}}});
+    desenhar('cItens', {type:'bar', data:{labels:E.itens.map(i=>quebrar(i.texto)), datasets:[{data:E.itens.map(i=>i.media),
+        backgroundColor:E.itens.map(i=>i.media>=4?'#10822F':i.media>=3?'#36A862':'#E6A23C'), borderRadius:6}]},
+      options:{indexAxis:'y', maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{min:0,max:5,ticks:{stepSize:1}}}}});
+  }
+
+  app.querySelectorAll('th[data-o]').forEach(th => th.onclick = () => {
+    const c = th.dataset.o; ordem = {col:c, dir: ordem.col===c ? -ordem.dir : (c==='nome'?1:-1)}; render();
+  });
+  app.querySelectorAll('tr[data-p]').forEach(tr => tr.querySelector('.nome').onclick = () => abrir(tr.dataset.p));
+}
+
+function quebrar(t){ const w = t.split(' '); const out=[]; let l=''; w.forEach(p=>{ if((l+' '+p).trim().length>28){out.push(l.trim()); l=p;} else l+=' '+p; }); out.push(l.trim()); return out; }
+function listar(arr, cls){ return arr.length ? `<ul class="lista ${cls}">${arr.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>` : '<p class="vazio">Nenhum comentário ainda.</p>'; }
+
+/* ---------- Detalhe ---------- */
+function abrir(nome){
+  const d = DADOS, p = d.pessoas.find(x=>x.nome===nome), comps = d.competencias;
+  const gap = (p.liberado && p.mediaAuto!=null) ? p.mediaAuto - p.mediaOutros : null;
+  $('#detalhe').innerHTML = `<button class="btn fechar" id="fechar">Fechar</button>
+    <h3 style="font-size:20px">${esc(p.nome)}</h3><p class="sub">${p.recebidas} avaliações de colegas · ${p.respondeu?'já respondeu a pesquisa':'ainda não respondeu'}</p>
+    <div class="mini">
+      <div><small>Média dos colegas</small><b>${f1(p.mediaOutros)}</b></div>
+      <div><small>Autoavaliação</small><b>${f1(p.mediaAuto)}</b></div>
+      <div><small>Diferença (auto − colegas)</small><b class="${gap==null?'':gap>0?'dif-neg':'dif-pos'}">${gap==null?'—':(gap>0?'+':'')+f1(gap)}</b></div>
+    </div>
+    ${p.liberado ? `<div class="grid duas">
+        <div style="height:300px"><canvas id="cRadar"></canvas></div>
+        <div><table><thead><tr><th style="text-align:left">Competência</th><th>Colegas</th><th>Auto</th></tr></thead><tbody>
+          ${comps.map(c=>`<tr><td class="nome" style="cursor:default">${esc(c.nome)}</td><td style="${corNota(p.outros[c.id])}">${f1(p.outros[c.id])}</td><td style="${corNota(p.auto[c.id])}">${f1(p.auto[c.id])}</td></tr>`).join('')}
+        </tbody></table></div></div>
+      <div class="grid duas" style="margin-top:16px">
+        <div><h3 class="dif-pos" style="margin-bottom:8px">Continue fazendo</h3>${listar(p.continuar,'pos')}</div>
+        <div><h3 style="color:#9A5B00;margin-bottom:8px">Pode melhorar</h3>${listar(p.melhorar,'neg')}</div>
+      </div>`
+      : `<p class="vazio">🔒 Resultados dos colegas liberados a partir de ${d.minimo} avaliações (${p.recebidas} até agora).</p>`}
+    ${p.autoTextos ? `<div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--borda)"><h3 style="margin-bottom:8px">Na visão da própria pessoa</h3>
+      <ul class="lista"><li><b>Ponto forte:</b> ${esc(p.autoTextos.forte)}</li><li><b>Onde precisa melhorar:</b> ${esc(p.autoTextos.melhoria)}</li></ul></div>` : ''}`;
+  $('#modal').hidden = false; document.body.style.overflow = 'hidden';
+  $('#fechar').onclick = fechar;
+  if (p.liberado) desenhar('cRadar', {type:'radar', data:{labels:comps.map(c=>c.nome), datasets:[
+      {label:'Colegas', data:comps.map(c=>p.outros[c.id]), borderColor:'#10822F', backgroundColor:'rgba(16,130,47,.18)', pointBackgroundColor:'#10822F'},
+      {label:'Autoavaliação', data:comps.map(c=>p.auto[c.id]), borderColor:'#3787B8', backgroundColor:'rgba(55,135,184,.12)', pointBackgroundColor:'#3787B8', borderDash:[5,4]}]},
+    options:{maintainAspectRatio:false, scales:{r:{min:0,max:5,ticks:{stepSize:1,backdropColor:'transparent'},pointLabels:{font:{size:11}}}}, plugins:{legend:{position:'bottom'}}}});
+}
+function fechar(){ $('#modal').hidden = true; document.body.style.overflow = ''; }
+$('#modal').addEventListener('click', e => { if (e.target.id==='modal') fechar(); });
+document.addEventListener('keydown', e => { if (e.key==='Escape') fechar(); });
+$('#btnAtualizar').onclick = () => carregar(false);
+$('#btnSair').onclick = () => { setSenha(null); telaLogin(); };
+
+/* ---------- Demonstração ---------- */
+function gerarDemo(){
+  const nomes = ['Carlos Maykon','Eduarda Pinto','Emanoel Carlos','Elana Dantas','Leandro Silva','Luiz Victor','Thalison Roberto','Udo Dirck','Yuri Ramon','Brenda Rommaneli','Bruno Max','José Sérgio','Jefferson Rafael','Maria Vitória','João Paulo','José Heverton','Edmilson Barbosa'];
+  const comps = [['atendimento','Atendimento ao cliente'],['equipe','Trabalho em equipe'],['comprometimento','Comprometimento'],['comunicacao','Comunicação'],['proatividade','Proatividade'],['conhecimento','Conhecimento técnico']].map(([id,nome])=>({id,nome}));
+  let s = 7; const rnd = () => (s = (s*16807)%2147483647)/2147483647;
+  const r2 = v => Math.round(Math.max(1,Math.min(5,v))*100)/100;
+  const pos = ['Sempre disposto a ajudar quando a loja enche.','Muito atencioso com os clientes.','Conhece bem os produtos e explica com calma.','Pontual e organizado.','Mantém o clima leve na equipe.'];
+  const neg = ['Avisar com antecedência quando for se atrasar.','Registrar os pedidos no sistema na hora.','Ter mais paciência em momentos de pressão.','Repassar informações para o turno seguinte.','Tomar iniciativa sem esperar ser chamado.'];
+  const pessoas = nomes.map((nome,i)=>{
+    const rec = i<14 ? 3+Math.floor(rnd()*3) : Math.floor(rnd()*3); const lib = rec>=3; const base = 3+rnd()*1.6;
+    const outros={}, auto={}; comps.forEach(c=>{ outros[c.id]= lib? r2(base+(rnd()-.5)*1.4):null; auto[c.id]= i<13? Math.round(Math.max(1,Math.min(5,base+.4+(rnd()-.5)*1.6))):null; });
+    const m = o => { const v=Object.values(o).filter(x=>x!=null); return v.length? Math.round(v.reduce((a,b)=>a+b,0)/v.length*100)/100:null; };
+    return {nome, respondeu:i<13, recebidas:rec, liberado:lib, outros, auto, mediaOutros: lib?m(outros):null, mediaAuto: i<13?m(auto):null,
+      autoTextos: i<13?{forte:pos[i%5], melhoria:neg[(i+2)%5]}:null,
+      continuar: lib? pos.slice(0,rec).sort(()=>rnd()-.5):[], melhorar: lib? neg.slice(0,rec).sort(()=>rnd()-.5):[]};
+  });
+  const equipe = comps.map(c=>{ const o=pessoas.filter(p=>p.outros[c.id]!=null).map(p=>p.outros[c.id]); const a=pessoas.filter(p=>p.auto[c.id]!=null).map(p=>p.auto[c.id]);
+    const m=v=>v.length?Math.round(v.reduce((x,y)=>x+y,0)/v.length*100)/100:null; return {...c, outros:m(o), auto:m(a)}; });
+  const hist=[0,0,0,0,0,1,1,2,3,4,2];
+  return {ok:true, minimo:3, atualizadoEm:new Date().toISOString(), competencias:comps, adesao:{total:17,responderam:13}, equipe, pessoas,
+    empresa:{respostas:13, liberado:true, enps:Math.round((6-2)/13*100), promotores:6, neutros:5, detratores:2, histograma:hist,
+      itens:[{id:'orgulho',texto:'Tenho orgulho de trabalhar na CJ Home Center.',media:4.3},{id:'clareza',texto:'Sei claramente o que se espera do meu trabalho.',media:3.6},{id:'comunicacao',texto:'A comunicação entre liderança e equipe funciona bem.',media:3.1},{id:'reconhecimento',texto:'Me sinto reconhecido(a) pelo trabalho que faço.',media:2.9}],
+      melhor:['O ambiente entre a equipe é muito bom.','A variedade de produtos.','A liderança está sempre por perto.'],
+      mudar:['Metas mais claras para cada setor.','Reuniões rápidas de alinhamento no início da semana.','Mais reconhecimento de quem se destaca.']}};
+}
+
+/* ---------- Boot ---------- */
+if (DEMO){ $('#demo').hidden = false; $('#btnSair').hidden = true; }
+carregar(true);
+</script>
+</body>
+</html>
