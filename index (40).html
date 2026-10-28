@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Avaliação 360° · CJ Home Center</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --azul:#3787B8; --azul-esc:#2A6C94; --azul-cl:#EAF3F9;
+    --verde:#10822F; --verde-cl:#E7F4EA; --verde-med:#36A862;
+    --cinza:#5B5B5B; --texto:#2B2F33; --suave:#6B7280; --borda:#E3E7EB;
+    --fundo:#F5F7F9; --branco:#fff; --erro:#C2410C; --erro-cl:#FFF1EB;
+    --raio:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:'Montserrat',system-ui,sans-serif;background:var(--fundo);color:var(--texto);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  header{background:var(--branco);border-bottom:1px solid var(--borda);position:sticky;top:0;z-index:10}
+  .top{max-width:680px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .top svg{height:38px;width:auto;display:block}
+  .tag{font-size:12px;font-weight:600;color:var(--azul);background:var(--azul-cl);padding:4px 10px;border-radius:99px;white-space:nowrap}
+  .barra{height:4px;background:var(--borda)}
+  .barra i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--azul),var(--verde));transition:width .35s ease}
+  main{max-width:680px;margin:0 auto;padding:20px 16px 120px}
+  .card{background:var(--branco);border:1px solid var(--borda);border-radius:var(--raio);padding:22px 20px;margin-bottom:14px}
+  h1{font-size:24px;line-height:1.25;margin:0 0 8px;font-weight:800;color:var(--texto)}
+  h2{font-size:19px;margin:0 0 4px;font-weight:700}
+  .etapa{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--verde);margin-bottom:6px}
+  .sub{color:var(--suave);margin:0 0 4px;font-size:15px}
+  .passos{list-style:none;padding:0;margin:16px 0 0;display:grid;gap:10px}
+  .passos li{display:flex;gap:12px;align-items:flex-start}
+  .passos b{flex:0 0 28px;height:28px;border-radius:50%;background:var(--azul-cl);color:var(--azul);display:grid;place-items:center;font-size:14px}
+  .aviso{background:var(--verde-cl);border-radius:12px;padding:14px 16px;font-size:14px;margin-top:16px}
+  .aviso strong{color:var(--verde)}
+  .dica{font-size:14px;color:var(--suave);margin-top:12px}
+  .legenda{display:flex;justify-content:space-between;font-size:12px;color:var(--suave);background:var(--fundo);border-radius:10px;padding:8px 12px;margin:12px 0 2px;gap:8px}
+  .q{padding:16px 0;border-top:1px solid var(--borda)}
+  .q:first-of-type{border-top:0}
+  .q-t{font-weight:700;font-size:15.5px}
+  .q-d{font-size:13.5px;color:var(--suave);margin:2px 0 10px}
+  .esc{display:flex;gap:6px;flex-wrap:wrap}
+  .esc button{font:inherit;font-weight:700;font-size:16px;min-width:44px;height:44px;flex:1 1 44px;border:1.5px solid var(--borda);background:var(--branco);color:var(--texto);border-radius:10px;cursor:pointer;transition:all .15s}
+  .esc button:hover{border-color:var(--azul)}
+  .esc button.on{background:var(--azul);border-color:var(--azul);color:#fff}
+  .esc button.ns{flex:1.6 1 72px;font-size:13px;font-weight:600;color:var(--suave)}
+  .esc button.ns.on{background:var(--cinza);border-color:var(--cinza);color:#fff}
+  .esc.nps button{min-width:38px;flex:1 1 38px;font-size:15px}
+  .esc.nps button.on.d{background:#D9534F;border-color:#D9534F}
+  .esc.nps button.on.n{background:#E6A23C;border-color:#E6A23C}
+  .esc.nps button.on.p{background:var(--verde);border-color:var(--verde)}
+  .esc.conc button{font-size:14px}
+  .extremos{display:flex;justify-content:space-between;font-size:12px;color:var(--suave);margin-top:6px}
+  label.campo{display:block;font-weight:700;font-size:15px;margin:18px 0 4px}
+  label.campo .ajuda{display:block;font-weight:500;font-size:13px;color:var(--suave)}
+  textarea,input[type=text]{width:100%;font:inherit;font-size:16px;border:1.5px solid var(--borda);border-radius:10px;padding:11px 12px;background:var(--branco);color:var(--texto);resize:vertical}
+  textarea{min-height:72px}
+  textarea:focus,input:focus{outline:none;border-color:var(--azul);box-shadow:0 0 0 3px var(--azul-cl)}
+  .pos{color:var(--verde)} .neg{color:var(--erro)}
+  .invalido{border-radius:12px;background:var(--erro-cl);box-shadow:0 0 0 2px var(--erro-cl);animation:pulse .5s}
+  textarea.invalido{border-color:var(--erro);background:var(--erro-cl)}
+  @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.01)}100%{transform:scale(1)}}
+  .colega{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+  .avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,var(--azul),var(--verde));color:#fff;display:grid;place-items:center;font-weight:800;font-size:17px;flex:0 0 48px}
+  .rodape{position:fixed;left:0;right:0;bottom:0;background:rgba(255,255,255,.96);backdrop-filter:blur(6px);border-top:1px solid var(--borda);padding:12px 16px calc(12px + env(safe-area-inset-bottom))}
+  .rodape .in{max-width:680px;margin:0 auto;display:flex;gap:10px;align-items:center}
+  .msg{flex:1;font-size:13px;color:var(--erro);font-weight:600}
+  .btn{font:inherit;font-weight:700;font-size:15px;border-radius:12px;padding:13px 22px;border:0;cursor:pointer;transition:filter .15s}
+  .btn:hover{filter:brightness(1.07)}
+  .btn.pri{background:var(--verde);color:#fff}
+  .btn.sec{background:var(--fundo);color:var(--texto);border:1.5px solid var(--borda)}
+  .btn:disabled{opacity:.6;cursor:wait}
+  .centro{text-align:center;padding:40px 20px}
+  .ok{width:72px;height:72px;border-radius:50%;background:var(--verde-cl);color:var(--verde);display:grid;place-items:center;margin:0 auto 16px;font-size:36px;font-weight:800}
+  .spin{width:34px;height:34px;border:3px solid var(--borda);border-top-color:var(--azul);border-radius:50%;margin:30px auto;animation:g 1s linear infinite}
+  @keyframes g{to{transform:rotate(360deg)}}
+  .demo{background:#FFF7E0;color:#8A6100;font-size:12px;font-weight:600;text-align:center;padding:6px}
+  .cod{display:flex;gap:10px;margin-top:14px}
+  .cod input{text-transform:uppercase;letter-spacing:.2em;font-weight:700;text-align:center}
+  @media (max-width:420px){ h1{font-size:21px} .esc button{min-width:40px;height:42px} .top svg{height:32px} .card{padding:18px 16px} }
+  .selo{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:5px 10px;border-radius:99px;margin-bottom:10px}
+  .selo.id{background:var(--azul-cl);color:var(--azul-esc)}
+  .selo.an{background:var(--verde-cl);color:var(--verde)}
+  .btn.link{display:inline-block;text-decoration:none;margin-top:18px}
+  .lista-col{list-style:none;padding:0;margin:14px 0 0;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+  .lista-col label{display:flex;align-items:center;gap:10px;border:1.5px solid var(--borda);border-radius:12px;padding:11px 12px;cursor:pointer;font-weight:600;font-size:14.5px;background:var(--branco);transition:all .15s}
+  .lista-col input{width:20px;height:20px;accent-color:var(--verde);flex:0 0 20px}
+  .lista-col label.on{border-color:var(--verde);background:var(--verde-cl)}
+  .lista-col small{display:block;font-size:11px;font-weight:600;color:#9A5B00}
+  .contador{font-size:13px;font-weight:700;color:var(--verde);margin-top:12px}
+</style>
+</head>
+<body>
+<div id="demo" class="demo" hidden>Modo demonstração — nada será enviado</div>
+<header>
+  <div class="top">
+    <svg viewBox="130 320 820 440" role="img" aria-label="CJ Home Center">
+      <path fill="#3787B8" d="M352,328 A212,212 0 1,0 501.9,689.9 L465.1,653.1 A160,160 0 1,1 352,380 Z"/>
+      <path fill="#10822F" d="M405,335 L457,356 L457,540 A105,105 0 0,1 247,540 L300,540 A52.5,52.5 0 0,0 405,540 Z"/>
+      <g style="mix-blend-mode:multiply">
+        <polygon fill="#3787B8" points="509,468 596,549 509,630"/>
+        <polygon fill="#36A862" points="509,408 596,489 509,570" opacity=".9"/>
+        <polygon fill="#10822F" points="509,347 596,429 509,510" opacity=".95"/>
+      </g>
+      <text x="630" y="470" font-family="Montserrat,sans-serif" font-weight="800" font-size="76" fill="#5B5B5B" letter-spacing="2">HOME</text>
+      <text x="628" y="546" font-family="Montserrat,sans-serif" font-weight="300" font-size="76" fill="#5B5B5B" letter-spacing="2">CENTER</text>
+    </svg>
+    <span class="tag">Avaliação anônima</span>
+  </div>
+  <div class="barra"><i id="progresso"></i></div>
+</header>
+<main id="app"><div class="spin"></div></main>
+<div class="rodape" id="rodape" hidden>
+  <div class="in">
+    <button class="btn sec" id="voltar">Voltar</button>
+    <div class="msg" id="msg"></div>
+    <button class="btn pri" id="avancar">Continuar</button>
+  </div>
+</div>
+
+<script>
+/* ============ CONFIGURAÇÃO ============ */
+const API_URL = 'https://script.google.com/macros/s/AKfycbzwOspQH4EA1jXqMueAai4FOA9wP8rxhqI3GvBpyqk8P8elzYZj8Gbv0z88ErNa33gh/exec'; // termina em /exec
+/* ===================================== */
+
+const qs = new URLSearchParams(location.search);
+const DEMO = qs.has('demo') || !/^https:\/\/script\.google\.com\//.test(API_URL);
+const $ = s => document.querySelector(s);
+const app = $('#app');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const iniciais = n => String(n).split(' ').filter(Boolean).slice(0,2).map(p=>p[0]).join('').toUpperCase();
+let S = null;
+
+const DEMO_INFO = { ok:true, dono:'Netinho', minColegas:2, minimo:3,
+  colaboradores:['Carlos Maykon','Eduarda Pinto','Emanoel Carlos','Elana Dantas','Leandro Silva','Luiz Victor','Thalison Roberto','Udo Dirck','Yuri Ramon','Brenda Rommaneli','Bruno Max','José Sérgio','Jefferson Rafael','Maria Vitória','João Paulo','José Heverton','Edmilson Barbosa'].map((n,i)=>({nome:n, precisa:i%4===0})),
+  competencias:[
+    {id:'atendimento',nome:'Atendimento ao cliente',desc:'Recebe bem, escuta e resolve a necessidade do cliente.'},
+    {id:'equipe',nome:'Trabalho em equipe',desc:'Colabora, ajuda os colegas e divide responsabilidades.'},
+    {id:'comprometimento',nome:'Comprometimento',desc:'É pontual, cumpre o que promete e cuida das suas tarefas.'},
+    {id:'comunicacao',nome:'Comunicação',desc:'Se expressa com clareza e respeito e repassa informações.'},
+    {id:'proatividade',nome:'Proatividade',desc:'Antecipa problemas e age sem precisar ser cobrado.'},
+    {id:'conhecimento',nome:'Conhecimento técnico',desc:'Domina produtos, processos e sistemas da loja.'}],
+  itensEmpresa:[
+    {id:'orgulho',texto:'Tenho orgulho de trabalhar na CJ Home Center.'},
+    {id:'clareza',texto:'Sei claramente o que se espera do meu trabalho.'},
+    {id:'comunicacao',texto:'A comunicação entre liderança e equipe funciona bem.'},
+    {id:'reconhecimento',texto:'Me sinto reconhecido(a) pelo trabalho que faço.'}] };
+
+async function apiInicio(){ if (DEMO){ await new Promise(r=>setTimeout(r,300)); return DEMO_INFO; }
+  return (await fetch(API_URL+'?acao=anonimo')).json(); }
+async function apiEnviar(p){ if (DEMO){ await new Promise(r=>setTimeout(r,800)); return {ok:true}; }
+  return (await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(p)})).json(); }
+
+/* Rascunho só na aba atual (sessionStorage) — nada fica no aparelho depois de fechar. */
+const K = 'cj360anon';
+const salvar = () => { try{ sessionStorage.setItem(K, JSON.stringify({passo:S.passo, resp:S.resp})); }catch(e){} };
+const ler = () => { try{ return JSON.parse(sessionStorage.getItem(K)||'null'); }catch(e){ return null; } };
+const apagar = () => { try{ sessionStorage.removeItem(K); }catch(e){} };
+const jaEnviou = () => { try{ return localStorage.getItem(K+'_enviado')==='1'; }catch(e){ return false; } };
+const marcarEnviado = () => { try{ localStorage.setItem(K+'_enviado','1'); }catch(e){} };
+
+function get(path){ return path.split('.').reduce((o,k)=>o==null?o:o[k], S.resp); }
+function set(path,v){ const ks=path.split('.'); const l=ks.pop(); ks.reduce((o,k)=>o[k],S.resp)[l]=v; salvar(); }
+const novoAval = () => ({notas:{}, continuar:'', melhorar:''});
+
+function montarPassos(){
+  S.passos = ['intro','dono','escolher', ...S.resp.sel.map(n=>'colega:'+n), 'empresa'];
+}
+
+async function iniciar(forcar){
+  app.innerHTML = '<div class="spin"></div>';
+  if (jaEnviou() && !forcar) return telaJa();
+  try{
+    const info = await apiInicio();
+    if (!info.ok) throw new Error(info.erro);
+    S = {info, passo:0, resp:{sel:[], aval:{[info.dono]:novoAval()}, empresa:{enps:null, itens:{}, melhor:'', mudar:''}}};
+    const r = ler(); if (r && r.resp && r.resp.aval) { S.resp = r.resp; S.passo = r.passo||0; }
+    montarPassos(); render();
+  }catch(e){
+    $('#rodape').hidden = true;
+    app.innerHTML = `<div class="card"><h1>Não foi possível carregar</h1><p class="sub">${esc(e.message && e.message!=='Failed to fetch' ? e.message : 'Verifique sua internet e tente novamente.')}</p></div>`;
+  }
+}
+
+function telaJa(){
+  $('#rodape').hidden = true;
+  app.innerHTML = `<div class="card centro"><div class="ok">✓</div><h1>Este aparelho já enviou uma avaliação</h1>
+    <p class="sub">Obrigado pela participação! Se outra pessoa da equipe vai responder usando este mesmo aparelho, toque abaixo.</p>
+    <button class="btn sec" id="outra" style="margin-top:14px">Outra pessoa vai responder aqui</button></div>`;
+  $('#outra').onclick = () => iniciar(true);
+}
+
+function telaFim(){
+  $('#rodape').hidden = true; $('#progresso').style.width = '100%';
+  app.innerHTML = `<div class="card centro"><div class="ok">✓</div><h1>Avaliação enviada!</h1>
+    <p class="sub">Muito obrigado. Sua resposta foi registrada sem nenhuma identificação e vai ajudar toda a equipe da CJ Home Center a crescer.</p>
+    <p class="dica">Se ainda não fez, não esqueça da sua autoavaliação, que fica no seu link pessoal.</p></div>`;
+}
+
+const LEGENDA = `<div class="legenda"><span><b>1</b> Muito abaixo</span><span><b>3</b> Adequado</span><span><b>5</b> Excelente</span></div>`;
+function escala(path, o){
+  const v = get(path); const {min=1,max=5,naoSei=false,classe=''} = o||{};
+  let h = `<div class="esc ${classe}" data-path="${esc(path)}">`;
+  for (let n=min;n<=max;n++){ const c = classe==='nps' ? (n<=6?'d':n<=8?'n':'p') : '';
+    h += `<button type="button" class="${c} ${v===n?'on':''}" data-v="${n}">${n}</button>`; }
+  if (naoSei) h += `<button type="button" class="ns ${v===0?'on':''}" data-v="0">Não sei</button>`;
+  return h + '</div>';
+}
+function competencias(base){
+  return S.info.competencias.map(c=>`<div class="q" data-req="${esc(base+'.'+c.id)}"><div class="q-t">${esc(c.nome)}</div><div class="q-d">${esc(c.desc)}</div>${escala(base+'.'+c.id,{naoSei:true})}</div>`).join('');
+}
+function campo(path, rot, ajuda, ph, obrig=true){
+  return `<label class="campo">${rot}<span class="ajuda">${ajuda}</span></label>
+  <textarea data-path="${esc(path)}" ${obrig?`data-req="${esc(path)}"`:''} maxlength="600" placeholder="${esc(ph)}">${esc(get(path)||'')}</textarea>`;
+}
+function blocoPessoa(nome, sub){
+  const b = 'aval.'+nome;
+  return `<div class="colega" style="margin-top:6px"><div class="avatar">${esc(iniciais(nome))}</div><div><h2>${esc(nome)}</h2><p class="sub" style="margin:0">${sub}</p></div></div>
+    ${LEGENDA}${competencias(b+'.notas')}
+    ${campo(b+'.continuar','<span class="pos">●</span> Continue fazendo','O que essa pessoa faz bem e deve manter.','Ex.: Sempre ajuda no atendimento quando a loja está cheia.')}
+    ${campo(b+'.melhorar','<span class="neg">●</span> Pode melhorar','Um comportamento concreto que faria diferença. Seja construtivo.','Ex.: Avisar com antecedência quando for se atrasar.')}`;
+}
+
+function render(){
+  const p = S.passos[S.passo], I = S.info, nSel = S.resp.sel.length;
+  $('#rodape').hidden = false; $('#msg').textContent = '';
+  $('#progresso').style.width = (S.passo/S.passos.length*100) + '%';
+  $('#voltar').style.visibility = S.passo===0 ? 'hidden' : 'visible';
+  $('#avancar').textContent = p==='intro' ? 'Começar' : p==='empresa' ? 'Enviar avaliação' : 'Continuar';
+  const selo = '<span class="selo an">● Anônima</span>';
+
+  if (p==='intro'){
+    app.innerHTML = `<div class="card">${selo}
+      <h1>Avaliação da equipe e da CJ</h1>
+      <p class="sub">Aqui você avalia o <b>${esc(I.dono)}</b>, os <b>colegas com quem trabalha</b> e a <b>empresa</b>.</p>
+      <div class="aviso"><strong>Esta avaliação é anônima de verdade.</strong>
+        <ul style="margin:8px 0 0;padding-left:18px">
+          <li>O link é o mesmo para toda a equipe: não tem código nem pede seu nome.</li>
+          <li>As respostas são gravadas sem data e fora de ordem.</li>
+          <li>Os resultados de cada pessoa só aparecem depois de ${I.minimo} avaliações, sempre agrupados.</li>
+        </ul></div>
+      <p class="dica">Seja sincero e respeitoso: fale de atitudes, não da pessoa. "Ajuda os colegas quando a loja enche" vale mais que "é legal". Cada pessoa avaliada leva cerca de 1 minuto.</p>
+    </div>`;
+  }
+  else if (p==='dono'){
+    app.innerHTML = `<div class="card">${selo}<div class="etapa">Liderança</div>${blocoPessoa(I.dono,'Avaliação obrigatória para toda a equipe.')}</div>`;
+  }
+  else if (p==='escolher'){
+    const lista = I.colaboradores.slice().sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+    app.innerHTML = `<div class="card" data-req="__sel">${selo}<div class="etapa">Colegas</div>
+      <h2>Com quem você trabalha?</h2>
+      <p class="sub">Marque <b>todos os colegas com quem você trabalha</b> no dia a dia (mínimo ${I.minColegas}). <b>Não marque o seu próprio nome.</b></p>
+      <ul class="lista-col">${lista.map(c=>{ const on = S.resp.sel.includes(c.nome);
+        return `<li><label class="${on?'on':''}"><input type="checkbox" value="${esc(c.nome)}" ${on?'checked':''}><span>${esc(c.nome)}${c.precisa?'<small>precisa de avaliações</small>':''}</span></label></li>`; }).join('')}</ul>
+      <div class="contador" id="contador"></div></div>`;
+    atualizarContador();
+  }
+  else if (p.startsWith('colega:')){
+    const nome = p.slice(7), i = S.resp.sel.indexOf(nome);
+    app.innerHTML = `<div class="card">${selo}<div class="etapa">Colega ${i+1} de ${nSel}</div>${blocoPessoa(nome,'Pense no dia a dia de trabalho com essa pessoa.')}</div>`;
+  }
+  else if (p==='empresa'){
+    app.innerHTML = `<div class="card">${selo}<div class="etapa">Sobre a empresa</div>
+      <h2>Sobre a CJ Home Center</h2>
+      <div class="q" data-req="empresa.enps"><div class="q-t">De 0 a 10, o quanto você recomendaria a CJ como um bom lugar para trabalhar?</div>
+        <div style="margin-top:10px">${escala('empresa.enps',{min:0,max:10,classe:'nps'})}</div>
+        <div class="extremos"><span>Nada provável</span><span>Muito provável</span></div></div>
+      ${I.itensEmpresa.map(it=>`<div class="q" data-req="empresa.itens.${esc(it.id)}"><div class="q-t">${esc(it.texto)}</div>
+        <div style="margin-top:10px">${escala('empresa.itens.'+it.id,{classe:'conc'})}</div>
+        <div class="extremos"><span>Discordo totalmente</span><span>Concordo totalmente</span></div></div>`).join('')}
+      ${campo('empresa.melhor','O que a CJ faz de melhor?','Opcional','Ex.: O ambiente entre a equipe é muito bom.',false)}
+      ${campo('empresa.mudar','O que a CJ deveria mudar já?','Opcional','Ex.: Ter metas mais claras para cada setor.',false)}</div>`;
+  }
+  window.scrollTo({top:0,behavior:'instant'});
+}
+
+function atualizarContador(){
+  const n = S.resp.sel.length, el = $('#contador'); if (!el) return;
+  el.textContent = n ? `${n} colega${n>1?'s':''} selecionado${n>1?'s':''} · cerca de ${n+3} minutos no total` : '';
+}
+
+app.addEventListener('change', ev => {
+  const cb = ev.target; if (cb.type!=='checkbox') return;
+  const nome = cb.value; let sel = S.resp.sel.filter(n=>n!==nome);
+  if (cb.checked){ sel.push(nome); if (!S.resp.aval[nome]) S.resp.aval[nome] = novoAval(); }
+  S.resp.sel = sel.sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  cb.closest('label').classList.toggle('on', cb.checked);
+  cb.closest('[data-req]').classList.remove('invalido');
+  $('#msg').textContent = '';
+  salvar(); montarPassos(); atualizarContador();
+});
+app.addEventListener('click', ev => {
+  const b = ev.target.closest('.esc button'); if (!b) return;
+  const g = b.parentElement; set(g.dataset.path, Number(b.dataset.v));
+  g.querySelectorAll('button').forEach(x => x.classList.toggle('on', x===b));
+  const q = g.closest('[data-req]'); if (q) q.classList.remove('invalido');
+});
+app.addEventListener('input', ev => { const t=ev.target; if (t.tagName==='TEXTAREA'&&t.dataset.path){ set(t.dataset.path,t.value); t.classList.remove('invalido'); } });
+
+function validar(){
+  if (S.passos[S.passo]==='escolher'){
+    if (S.resp.sel.length >= S.info.minColegas) return true;
+    app.querySelector('[data-req]').classList.add('invalido');
+    $('#msg').textContent = `Marque pelo menos ${S.info.minColegas} colegas.`; return false;
+  }
+  const pend = [...app.querySelectorAll('[data-req]')].filter(el => { const v=get(el.dataset.req);
+    return el.tagName==='TEXTAREA' ? String(v||'').trim().length<3 : (v===undefined||v===null||v===''); });
+  app.querySelectorAll('.invalido').forEach(e=>e.classList.remove('invalido'));
+  if (pend.length){ pend.forEach(e=>e.classList.add('invalido')); pend[0].scrollIntoView({behavior:'smooth',block:'center'});
+    $('#msg').textContent = pend.length===1?'Falta 1 resposta.':`Faltam ${pend.length} respostas.`; return false; }
+  return true;
+}
+
+$('#voltar').onclick = () => { if (S.passo>0){ S.passo--; salvar(); render(); } };
+$('#avancar').onclick = async () => {
+  if (!validar()) return;
+  if (S.passo < S.passos.length-1){ S.passo++; salvar(); render(); return; }
+  const btn=$('#avancar'); btn.disabled=true; btn.textContent='Enviando…';
+  const R = S.resp;
+  const alvos = [S.info.dono, ...R.sel];
+  const payload = { tipo:'anonimo',
+    avaliacoes: alvos.map(n=>({avaliado:n, notas:R.aval[n].notas, continuar:R.aval[n].continuar, melhorar:R.aval[n].melhorar})),
+    empresa: R.empresa };
+  try{
+    const r = await apiEnviar(payload);
+    if (!r.ok) throw new Error(r.erro||'Erro ao enviar.');
+    apagar(); marcarEnviado(); telaFim();
+  }catch(e){ btn.disabled=false; btn.textContent='Tentar novamente';
+    $('#msg').textContent = e.message && e.message!=='Failed to fetch' ? e.message : 'Falha de conexão. Tente de novo.'; }
+};
+
+if (DEMO) $('#demo').hidden = false;
+iniciar(qs.has('demo'));
+</script>
+</body>
+</html>
