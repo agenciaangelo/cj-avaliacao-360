@@ -91,6 +91,8 @@
   .lista-col label.on{border-color:var(--verde);background:var(--verde-cl)}
   .lista-col small{display:block;font-size:11px;font-weight:600;color:#9A5B00}
   .contador{font-size:13px;font-weight:700;color:var(--verde);margin-top:12px}
+  .pular{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:13.5px;font-weight:600;color:var(--suave);background:var(--fundo);border-radius:10px;padding:10px 12px;cursor:pointer}
+  .pular input{width:18px;height:18px;accent-color:var(--azul)}
 </style>
 </head>
 <body>
@@ -214,7 +216,7 @@ function render(){
     </div>`;
   } else {
     app.innerHTML = `<div class="card"><span class="selo id">● Identificada</span>
-      <h2>Sua autoavaliação</h2><p class="sub">Responda com sinceridade: como você avalia seu desempenho hoje?</p>
+      <h2>Sua autoavaliação${S.info.papel?' como '+esc(S.info.papel.toLowerCase()):''}</h2><p class="sub">${S.info.papel?'As perguntas são as mesmas que a equipe vai responder sobre você como '+esc(S.info.papel.toLowerCase())+'.':'Responda com sinceridade: como você avalia seu desempenho hoje?'}</p>
       ${LEGENDA}${S.info.competencias.map(c=>`<div class="q" data-req="notas.${esc(c.id)}"><div class="q-t">${esc(c.nome)}</div><div class="q-d">${esc(c.desc)}</div>${escala('notas.'+c.id)}</div>`).join('')}
       ${campo('forte','<span class="pos">●</span> Meu maior ponto forte','Uma qualidade que você traz para a equipe.','Ex.: Conheço bem os porcelanatos e consigo orientar o cliente na escolha.')}
       ${campo('melhoria','<span class="neg">●</span> Onde preciso melhorar','Algo que você gostaria de desenvolver.','Ex.: Preciso registrar melhor os pedidos no sistema.')}
