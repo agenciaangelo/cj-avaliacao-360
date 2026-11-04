@@ -165,7 +165,7 @@ async function iniciar(codigo){
     if (!info.ok) return telaCodigo(info.erro);
     if (info.jaRespondeu) return telaFim(info.urlGeral, 'Sua autoavaliação já foi registrada.');
     S = {codigo:String(codigo).toUpperCase(), info, passo:0, resp:{notas:{}, forte:'', melhoria:''}};
-    const r = ler(); if (r && r.resp) { S.resp = r.resp; } // mantém as respostas, mas sempre abre na tela inicial
+    const r = ler(); if (r && r.resp) { S.resp = r.resp; S.passo = r.passo||0; }
     render();
   }catch(e){ telaCodigo('Não foi possível conectar. Verifique sua internet e tente novamente.'); }
 }
