@@ -1,6 +1,6 @@
-<!doctype html> 
+<!doctype html>
 <html lang="pt-BR">
-<head> 
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Avaliação 360° · CJ Home Center</title>
@@ -136,8 +136,8 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const iniciais = n => String(n).split(' ').filter(Boolean).slice(0,2).map(p=>p[0]).join('').toUpperCase();
 let S = null;
 
-const DEMO_INFO = { ok:true, minColegas:2, minimo:3,
-  colaboradores:['Carlos Maykon','Eduarda Pinto','Emanoel Carlos','Elana Dantas','Leandro Silva','Luiz Victor','Udo Dirck','Yuri Ramon','Brenda Rommaneli','Bruno Max','José Sérgio','Jefferson Rafael','Maria Vitória','João Paulo','José Heverton','Edmilson Barbosa'].map((n,i)=>({nome:n, precisa:i%4===0})),
+const DEMO_INFO = { ok:true, minimo:3, textosObrigatorios:true,
+  colaboradores:['Carlos Maykon','Eduarda Pinto','Emanoel Carlos','Elana Dantas','Leandro Silva','Luiz Victor','Udo Dirck','Yuri Ramon','Brenda Rommaneli','Bruno Max','José Sérgio','Jefferson Rafael','Maria Vitória','João Paulo','José Heverton','Edmilson Barbosa'].map(n=>({nome:n})),
   competencias:[
     {id:'atendimento',nome:'Atendimento ao cliente',desc:'Recebe bem, escuta e resolve a necessidade do cliente.'},
     {id:'equipe',nome:'Trabalho em equipe',desc:'Colabora, ajuda os colegas e divide responsabilidades.'},
@@ -177,11 +177,12 @@ async function apiInicio(){ if (DEMO){ await new Promise(r=>setTimeout(r,300)); 
 async function apiEnviar(p){ if (DEMO){ await new Promise(r=>setTimeout(r,800)); return {ok:true}; }
   return (await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(p)})).json(); }
 
-/* Rascunho só na aba atual (sessionStorage) — nada fica no aparelho depois de fechar. */
-const K = 'cj360anon';
-const salvar = () => { try{ sessionStorage.setItem(K, JSON.stringify({passo:S.passo, resp:S.resp})); }catch(e){} };
-const ler = () => { try{ return JSON.parse(sessionStorage.getItem(K)||'null'); }catch(e){ return null; } };
-const apagar = () => { try{ sessionStorage.removeItem(K); }catch(e){} };
+/* Rascunho salvo só neste aparelho (para não perder o progresso) e apagado ao enviar. */
+const K = 'cj360anon', KR = 'cj360anon_v3';
+const salvar = () => { try{ localStorage.setItem(KR, JSON.stringify({passo:S.passo, resp:S.resp})); }catch(e){} };
+const ler = () => { try{ return JSON.parse(localStorage.getItem(KR)||'null'); }catch(e){ return null; } };
+const apagar = () => { try{ localStorage.removeItem(KR); sessionStorage.removeItem(K); }catch(e){} };
+const embaralhar = a => { for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
 const jaEnviou = () => { try{ return localStorage.getItem(K+'_enviado')==='1'; }catch(e){ return false; } };
 const marcarEnviado = () => { try{ localStorage.setItem(K+'_enviado','1'); }catch(e){} };
 
@@ -190,7 +191,7 @@ function set(path,v){ const ks=path.split('.'); const l=ks.pop(); ks.reduce((o,k
 const novoAval = () => ({notas:{}, continuar:'', melhorar:''});
 
 function montarPassos(){
-  S.passos = ['intro', ...S.info.lideres.map((_,i)=>'lider:'+i), 'escolher', ...S.resp.sel.map(n=>'colega:'+n), 'empresa'];
+  S.passos = ['intro', ...S.info.lideres.map((_,i)=>'lider:'+i), ...S.resp.ordem.map(n=>'colega:'+n), 'empresa'];
 }
 
 async function iniciar(forcar){
@@ -199,8 +200,15 @@ async function iniciar(forcar){
   try{
     const info = await apiInicio();
     if (!info.ok) throw new Error(info.erro);
-    S = {info, passo:0, resp:{sel:[], pular:[], aval:Object.fromEntries(info.lideres.map(l=>[l.nome,novoAval()])), empresa:{enps:null, itens:{}, melhor:'', mudar:''}}};
-    const r = ler(); if (r && r.resp && r.resp.aval) { S.resp = r.resp; S.passo = r.passo||0; }
+    const todos = [...info.lideres.map(l=>l.nome), ...info.colaboradores.map(c=>c.nome)];
+    S = {info, passo:0, resp:{
+      ordem: embaralhar(info.colaboradores.map(c=>c.nome)),   // ordem aleatória evita cansaço sempre nos mesmos nomes
+      pular:[], aval:Object.fromEntries(todos.map(n=>[n,novoAval()])),
+      empresa:{enps:null, itens:{}, melhor:'', mudar:''}}};
+    const r = ler();
+    const mesmaLista = r && r.resp && Array.isArray(r.resp.ordem) &&
+      r.resp.ordem.slice().sort().join('|') === info.colaboradores.map(c=>c.nome).sort().join('|');
+    if (mesmaLista) { S.resp = r.resp; S.passo = r.passo||0; }
     montarPassos(); render();
   }catch(e){
     $('#rodape').hidden = true;
@@ -239,16 +247,23 @@ function campo(path, rot, ajuda, ph, obrig=true){
   return `<label class="campo">${rot}<span class="ajuda">${ajuda}</span></label>
   <textarea data-path="${esc(path)}" ${obrig?`data-req="${esc(path)}"`:''} maxlength="600" placeholder="${esc(ph)}">${esc(get(path)||'')}</textarea>`;
 }
+function botaoPular(nome){
+  const pulou = (S.resp.pular||[]).includes(nome), primeiro = nome.split(' ')[0];
+  return `<label class="pular"><input type="checkbox" id="pular" data-nome="${esc(nome)}" ${pulou?'checked':''}> Eu sou ${esc(primeiro)}: pular esta etapa</label>`;
+}
 function blocoPessoa(nome, sub){
-  const b = 'aval.'+nome;
+  const b = 'aval.'+nome, ob = S.info.textosObrigatorios !== false;
+  const pulou = (S.resp.pular||[]).includes(nome);
   return `<div class="colega" style="margin-top:6px"><div class="avatar">${esc(iniciais(nome))}</div><div><h2>${esc(nome)}</h2><p class="sub" style="margin:0">${sub}</p></div></div>
+    ${botaoPular(nome)}
+    ${pulou ? `<p class="sub" style="margin-top:14px">Etapa pulada (é você). Toque em <b>Continuar</b>.</p>` : `
     ${LEGENDA}${competencias(b+'.notas')}
-    ${campo(b+'.continuar','<span class="pos">●</span> Continue fazendo','O que essa pessoa faz bem e deve manter.','Ex.: Sempre ajuda no atendimento quando a loja está cheia.')}
-    ${campo(b+'.melhorar','<span class="neg">●</span> Pode melhorar','Um comportamento concreto que faria diferença. Seja construtivo.','Ex.: Avisar com antecedência quando for se atrasar.')}`;
+    ${campo(b+'.continuar','<span class="pos">●</span> Continue fazendo',(ob?'':'Opcional · ')+'O que essa pessoa faz bem e deve manter.','Ex.: Sempre ajuda no atendimento quando a loja está cheia.',ob)}
+    ${campo(b+'.melhorar','<span class="neg">●</span> Pode melhorar',(ob?'':'Opcional · ')+'Um comportamento concreto que faria diferença. Seja construtivo.','Ex.: Avisar com antecedência quando for se atrasar.',ob)}`}`;
 }
 
 function render(){
-  const p = S.passos[S.passo], I = S.info, nSel = S.resp.sel.length;
+  const p = S.passos[S.passo], I = S.info, nCol = S.resp.ordem.length;
   $('#rodape').hidden = false; $('#msg').textContent = '';
   $('#progresso').style.width = (S.passo/S.passos.length*100) + '%';
   $('#voltar').style.visibility = S.passo===0 ? 'hidden' : 'visible';
@@ -258,14 +273,15 @@ function render(){
   if (p==='intro'){
     app.innerHTML = `<div class="card">${selo}
       <h1>Avaliação da equipe e da CJ</h1>
-      <p class="sub">Aqui você avalia a <b>liderança</b> (${I.lideres.map(l=>`<b>${esc(l.nome.split(' ')[0])}</b>`).join(' e ')}), os <b>colegas com quem trabalha</b> e a <b>empresa</b>.</p>
+      <p class="sub">Aqui você avalia <b>toda a equipe</b>: a liderança (${I.lideres.map(l=>`<b>${esc(l.nome.split(' ')[0])}</b>`).join(' e ')}), <b>todos os colegas</b> e, no final, a <b>empresa</b>.</p>
       <div class="aviso"><strong>Esta avaliação é anônima de verdade.</strong>
         <ul style="margin:8px 0 0;padding-left:18px">
           <li>O link é o mesmo para toda a equipe: não tem código nem pede seu nome.</li>
           <li>As respostas são gravadas sem data e fora de ordem.</li>
           <li>Os resultados de cada pessoa só aparecem depois de ${I.minimo} avaliações, sempre agrupados.</li>
         </ul></div>
-      <p class="dica">Seja sincero e respeitoso: fale de atitudes, não da pessoa. "Ajuda os colegas quando a loja enche" vale mais que "é legal". Cada pessoa avaliada leva cerca de 1 minuto.</p>
+      <p class="dica"><b>Quando chegar no seu próprio nome</b>, marque "Eu sou…" para pular. A sua autoavaliação é feita no seu link pessoal.</p>
+      <p class="dica">Seja sincero e respeitoso: fale de atitudes, não da pessoa. "Ajuda os colegas quando a loja enche" vale mais que "é legal". Cada pessoa leva cerca de 1 a 2 minutos, e o progresso fica salvo neste aparelho se você precisar parar.</p>
     </div>`;
   }
   else if (p.startsWith('lider:')){
@@ -273,7 +289,7 @@ function render(){
     const primeiro = L.nome.split(' ')[0], pulou = (S.resp.pular||[]).includes(L.nome);
     app.innerHTML = `<div class="card">${selo}<div class="etapa">Liderança · ${esc(L.papel)}</div>
       <div class="colega" style="margin-top:6px"><div class="avatar">${esc(iniciais(L.nome))}</div><div><h2>${esc(L.nome)}</h2><p class="sub" style="margin:0">Avalie o ${esc(primeiro)} como <b>${esc(L.papel.toLowerCase())}</b> da CJ. Todos da equipe respondem esta parte.</p></div></div>
-      ${L.colaborador ? `<label class="pular"><input type="checkbox" id="pular" data-nome="${esc(L.nome)}" ${pulou?'checked':''}> Eu sou o ${esc(primeiro)}: pular esta etapa</label>` : ''}
+      ${L.colaborador ? botaoPular(L.nome) : ''}
       ${pulou ? `<p class="sub" style="margin-top:14px">Etapa pulada. Toque em <b>Continuar</b>.</p>` : `
       <div class="legenda"><span><b>1</b> Muito abaixo</span><span><b>3</b> Adequado</span><span><b>5</b> Excelente</span></div>
       ${competencias(b+'.notas', L.competencias)}
@@ -281,19 +297,9 @@ function render(){
       ${campo(b+'.melhorar','<span class="neg">●</span> '+esc(T.melhorar?.rotulo||'Pode melhorar'), esc(T.melhorar?.ajuda||''),'Ex.: Avisar a equipe com antecedência sobre mudanças de escala.')}`}
     </div>`;
   }
-  else if (p==='escolher'){
-    const lista = I.colaboradores.slice().sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
-    app.innerHTML = `<div class="card" data-req="__sel">${selo}<div class="etapa">Colegas</div>
-      <h2>Com quem você trabalha?</h2>
-      <p class="sub">Marque <b>todos os colegas com quem você trabalha</b> no dia a dia (mínimo ${I.minColegas}). <b>Não marque o seu próprio nome.</b></p>
-      <ul class="lista-col">${lista.map(c=>{ const on = S.resp.sel.includes(c.nome);
-        return `<li><label class="${on?'on':''}"><input type="checkbox" value="${esc(c.nome)}" ${on?'checked':''}><span>${esc(c.nome)}${c.precisa?'<small>precisa de avaliações</small>':''}</span></label></li>`; }).join('')}</ul>
-      <div class="contador" id="contador"></div></div>`;
-    atualizarContador();
-  }
   else if (p.startsWith('colega:')){
-    const nome = p.slice(7), i = S.resp.sel.indexOf(nome);
-    app.innerHTML = `<div class="card">${selo}<div class="etapa">Colega ${i+1} de ${nSel}</div>${blocoPessoa(nome,'Pense no dia a dia de trabalho com essa pessoa.')}</div>`;
+    const nome = p.slice(7), i = S.resp.ordem.indexOf(nome);
+    app.innerHTML = `<div class="card">${selo}<div class="etapa">Colega ${i+1} de ${nCol}</div>${blocoPessoa(nome,'Pense no dia a dia de trabalho com essa pessoa.')}</div>`;
   }
   else if (p==='empresa'){
     app.innerHTML = `<div class="card">${selo}<div class="etapa">Sobre a empresa</div>
@@ -310,21 +316,16 @@ function render(){
   window.scrollTo({top:0,behavior:'instant'});
 }
 
-function atualizarContador(){
-  const n = S.resp.sel.length, el = $('#contador'); if (!el) return;
-  el.textContent = n ? `${n} colega${n>1?'s':''} selecionado${n>1?'s':''} · cerca de ${n+3} minutos no total` : '';
-}
-
 app.addEventListener('change', ev => {
   const cb = ev.target; if (cb.type!=='checkbox') return;
-  if (cb.id==='pular'){ const n = cb.dataset.nome; S.resp.pular = cb.checked ? [n] : []; salvar(); render(); return; }
-  const nome = cb.value; let sel = S.resp.sel.filter(n=>n!==nome);
-  if (cb.checked){ sel.push(nome); if (!S.resp.aval[nome]) S.resp.aval[nome] = novoAval(); }
-  S.resp.sel = sel.sort((a,b)=>a.localeCompare(b,'pt-BR'));
-  cb.closest('label').classList.toggle('on', cb.checked);
-  cb.closest('[data-req]').classList.remove('invalido');
-  $('#msg').textContent = '';
-  salvar(); montarPassos(); atualizarContador();
+  if (cb.id!=='pular') return;
+  const n = cb.dataset.nome, antes = (S.resp.pular||[])[0];
+  if (cb.checked && antes && antes!==n){
+    // só é possível pular uma pessoa (você mesmo)
+    cb.checked = false;
+    $('#msg').textContent = `Você já marcou que é ${antes.split(' ')[0]}. Desmarque lá para mudar.`; return;
+  }
+  S.resp.pular = cb.checked ? [n] : []; salvar(); render();
 });
 app.addEventListener('click', ev => {
   const b = ev.target.closest('.esc button'); if (!b) return;
@@ -335,11 +336,6 @@ app.addEventListener('click', ev => {
 app.addEventListener('input', ev => { const t=ev.target; if (t.tagName==='TEXTAREA'&&t.dataset.path){ set(t.dataset.path,t.value); t.classList.remove('invalido'); } });
 
 function validar(){
-  if (S.passos[S.passo]==='escolher'){
-    if (S.resp.sel.length >= S.info.minColegas) return true;
-    app.querySelector('[data-req]').classList.add('invalido');
-    $('#msg').textContent = `Marque pelo menos ${S.info.minColegas} colegas.`; return false;
-  }
   const pend = [...app.querySelectorAll('[data-req]')].filter(el => { const v=get(el.dataset.req);
     return el.tagName==='TEXTAREA' ? String(v||'').trim().length<3 : (v===undefined||v===null||v===''); });
   app.querySelectorAll('.invalido').forEach(e=>e.classList.remove('invalido'));
@@ -355,7 +351,7 @@ $('#avancar').onclick = async () => {
   const btn=$('#avancar'); btn.disabled=true; btn.textContent='Enviando…';
   const R = S.resp;
   const pular = R.pular || [];
-  const alvos = [...S.info.lideres.map(l=>l.nome).filter(n=>!pular.includes(n)), ...R.sel];
+  const alvos = [...S.info.lideres.map(l=>l.nome), ...R.ordem].filter(n=>!pular.includes(n));
   const payload = { tipo:'anonimo', pular,
     avaliacoes: alvos.map(n=>({avaliado:n, notas:R.aval[n].notas, continuar:R.aval[n].continuar, melhorar:R.aval[n].melhorar})),
     empresa: R.empresa };
