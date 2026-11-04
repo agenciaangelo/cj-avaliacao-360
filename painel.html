@@ -239,6 +239,28 @@ function render(){
     empresaHTML = `<div class="card"><p class="vazio">🔒 Os resultados sobre a empresa aparecem a partir de ${d.minimo} respostas (${E.respostas} até agora).</p></div>`;
   }
 
+  // Liderança (dono, gerente…)
+  const LID = d.lideres || [];
+  const lideresHTML = LID.map((L,k)=>{
+    const comAuto = L.mediaAuto!=null;
+    const ok = L.competencias.filter(c=>c.media!=null).slice().sort((a,b)=>b.media-a.media);
+    const gap = (L.liberado && comAuto) ? L.mediaAuto - L.media : null;
+    return `<section><h3 style="margin:22px 0 10px;font-size:18px">Liderança · ${esc(L.nome)} <span style="font-size:13px;color:var(--azul);font-weight:700">${esc(L.papel)}</span></h3>` + (L.liberado ? `
+      <div class="grid duas">
+        <div class="card"><h3>Avaliação da liderança</h3><p class="sub">${L.recebidas} avaliações · média da equipe <b>${f1(L.media)}</b>${comAuto?` · autoavaliação <b>${f1(L.mediaAuto)}</b>`:''} (1 a 5)</p>
+          <div style="height:${comAuto?320:280}px"><canvas id="cLider${k}"></canvas></div></div>
+        <div class="card"><h3>Leitura rápida</h3><p class="sub">Pontos de destaque na visão da equipe</p>
+          <ul class="insights">${ok.length ? `<li><b>Mais bem avaliado:</b> ${esc(ok[0].nome)} (${f1(ok[0].media)}).</li><li class="alerta"><b>Maior oportunidade:</b> ${esc(ok[ok.length-1].nome)} (${f1(ok[ok.length-1].media)}).</li>` : ''}
+          ${gap!=null && Math.abs(gap)>=0.5 ? `<li class="${gap>0?'alerta':''}"><b>Autoavaliação ${gap>0?'acima':'abaixo'} da percepção da equipe</b> (${gap>0?'+':''}${f1(gap)}).</li>` : ''}</ul>
+          ${L.autoTextos ? `<h3 style="margin:16px 0 8px;font-size:14px">Na visão do próprio ${esc(L.nome.split(' ')[0])}</h3><ul class="lista"><li><b>Ponto forte:</b> ${esc(L.autoTextos.forte)}</li><li><b>Onde precisa melhorar:</b> ${esc(L.autoTextos.melhoria)}</li></ul>` : ''}</div>
+      </div>
+      <div class="grid duas" style="margin-top:14px">
+        <div class="card"><h3>${esc(L.rotulos.continuar.rotulo)}</h3><p class="sub">${L.continuar.length} comentários</p>${listar(L.continuar,'pos')}</div>
+        <div class="card"><h3>${esc(L.rotulos.melhorar.rotulo)}</h3><p class="sub">${L.melhorar.length} comentários</p>${listar(L.melhorar,'neg')}</div>
+      </div>` : `<div class="card"><p class="vazio">🔒 A avaliação de ${esc(L.nome)} aparece a partir de ${d.minimo} respostas (${L.recebidas} até agora).</p></div>`) + `</section>`;
+  }).join('');
+  const adesaoPessoas = (d.adesao.pessoas || P);
+
   app.innerHTML = `
     <div class="grid kpis">
       <div class="card kpi"><small>Autoavaliações</small><b>${pct}%</b><span>${d.adesao.responderam} de ${d.adesao.total} colaboradores</span></div>
@@ -248,7 +270,7 @@ function render(){
     </div>
     <section class="card"><h3>Adesão</h3><p class="sub">Autoavaliações concluídas (link pessoal). O link anônimo não identifica quem respondeu: ${d.adesao.anonimas} de ${d.adesao.total} respostas até agora.</p>
       <div class="bar"><i style="width:${pct}%"></i></div>
-      <div class="chips">${P.filter(p=>!p.dono).sort((a,b)=>b.respondeu-a.respondeu||a.nome.localeCompare(b.nome)).map(p=>`<span class="chip ${p.respondeu?'ok':''}">${p.respondeu?'✓ ':''}${esc(p.nome)}</span>`).join('')}</div>
+      <div class="chips">${adesaoPessoas.slice().sort((a,b)=>b.respondeu-a.respondeu||a.nome.localeCompare(b.nome)).map(p=>`<span class="chip ${p.respondeu?'ok':''}">${p.respondeu?'✓ ':''}${esc(p.nome)}</span>`).join('')}</div>
     </section>
     <section class="grid duas">
       <div class="card"><h3>Competências da equipe</h3><p class="sub">Como a equipe se vê × como os colegas avaliam</p><div style="height:300px"><canvas id="cEquipe"></canvas></div></div>
@@ -256,12 +278,19 @@ function render(){
     </section>
     <section class="card"><h3>Mapa por colaborador</h3><p class="sub">Média dos colegas por competência · clique no nome para ver o detalhe e os comentários · clique no título da coluna para ordenar</p>
       <div class="tabela">${tabela}</div></section>
+    ${lideresHTML}
     <section><h3 style="margin:22px 0 10px;font-size:18px">Clima e marca empregadora</h3>${empresaHTML}</section>`;
 
   desenhar('cEquipe', {type:'bar', data:{labels:comps.map(c=>c.nome), datasets:[
       {label:'Autoavaliação', data:d.equipe.map(c=>c.auto), backgroundColor:'#3787B8', borderRadius:6},
       {label:'Colegas', data:d.equipe.map(c=>c.outros), backgroundColor:'#10822F', borderRadius:6}]},
     options:{indexAxis:'y', maintainAspectRatio:false, scales:{x:{min:0,max:5,ticks:{stepSize:1}}}, plugins:{legend:{position:'bottom'}}}});
+  LID.forEach((L,k)=>{ if (!L.liberado) return;
+    const ds = [{label:'Equipe', data:L.competencias.map(c=>c.media), backgroundColor:'#10822F', borderRadius:6}];
+    if (L.mediaAuto!=null) ds.unshift({label:'Autoavaliação', data:L.competencias.map(c=>c.auto), backgroundColor:'#3787B8', borderRadius:6});
+    desenhar('cLider'+k, {type:'bar', data:{labels:L.competencias.map(c=>c.nome), datasets:ds},
+      options:{indexAxis:'y', maintainAspectRatio:false, plugins:{legend:{display:ds.length>1, position:'bottom'}}, scales:{x:{min:0,max:5,ticks:{stepSize:1}}}}});
+  });
   if (E.liberado){
     desenhar('cHist', {type:'bar', data:{labels:[...Array(11).keys()], datasets:[{data:E.histograma,
         backgroundColor:[...Array(11).keys()].map(v=>v<=6?'#D9534F':v<=8?'#E6A23C':'#10822F'), borderRadius:4}]},
@@ -318,7 +347,7 @@ $('#btnSair').onclick = () => { setSenha(null); telaLogin(); };
 
 /* ---------- Demonstração ---------- */
 function gerarDemo(){
-  const nomes = ['Netinho','Carlos Maykon','Eduarda Pinto','Emanoel Carlos','Elana Dantas','Leandro Silva','Luiz Victor','Thalison Roberto','Udo Dirck','Yuri Ramon','Brenda Rommaneli','Bruno Max','José Sérgio','Jefferson Rafael','Maria Vitória','João Paulo','José Heverton','Edmilson Barbosa'];
+  const nomes = ['Carlos Maykon','Eduarda Pinto','Emanoel Carlos','Elana Dantas','Leandro Silva','Luiz Victor','Udo Dirck','Yuri Ramon','Brenda Rommaneli','Bruno Max','José Sérgio','Jefferson Rafael','Maria Vitória','João Paulo','José Heverton','Edmilson Barbosa'];
   const comps = [['atendimento','Atendimento ao cliente'],['equipe','Trabalho em equipe'],['comprometimento','Comprometimento'],['comunicacao','Comunicação'],['proatividade','Proatividade'],['conhecimento','Conhecimento técnico']].map(([id,nome])=>({id,nome}));
   let s = 7; const rnd = () => (s = (s*16807)%2147483647)/2147483647;
   const r2 = v => Math.round(Math.max(1,Math.min(5,v))*100)/100;
@@ -328,7 +357,6 @@ function gerarDemo(){
     const rec = i<14 ? 3+Math.floor(rnd()*3) : Math.floor(rnd()*3); const lib = rec>=3; const base = 3+rnd()*1.6;
     const outros={}, auto={}; comps.forEach(c=>{ outros[c.id]= lib? r2(base+(rnd()-.5)*1.4):null; auto[c.id]= i<13? Math.round(Math.max(1,Math.min(5,base+.4+(rnd()-.5)*1.6))):null; });
     const m = o => { const v=Object.values(o).filter(x=>x!=null); return v.length? Math.round(v.reduce((a,b)=>a+b,0)/v.length*100)/100:null; };
-    if (i===0) return {nome, dono:true, respondeu:null, recebidas:14, liberado:true, outros:Object.fromEntries(comps.map(c=>[c.id,r2(3.4+rnd())])), auto:{}, mediaOutros:3.9, mediaAuto:null, autoTextos:null, continuar:pos.slice(), melhorar:neg.slice()};
     return {nome, respondeu:i<13, recebidas:rec, liberado:lib, outros, auto, mediaOutros: lib?m(outros):null, mediaAuto: i<13?m(auto):null,
       autoTextos: i<13?{forte:pos[i%5], melhoria:neg[(i+2)%5]}:null,
       continuar: lib? pos.slice(0,rec).sort(()=>rnd()-.5):[], melhorar: lib? neg.slice(0,rec).sort(()=>rnd()-.5):[]};
@@ -336,7 +364,19 @@ function gerarDemo(){
   const equipe = comps.map(c=>{ const o=pessoas.filter(p=>p.outros[c.id]!=null).map(p=>p.outros[c.id]); const a=pessoas.filter(p=>p.auto[c.id]!=null).map(p=>p.auto[c.id]);
     const m=v=>v.length?Math.round(v.reduce((x,y)=>x+y,0)/v.length*100)/100:null; return {...c, outros:m(o), auto:m(a)}; });
   const hist=[0,0,0,0,0,1,1,2,3,4,2];
-  return {ok:true, minimo:3, atualizadoEm:new Date().toISOString(), competencias:comps, adesao:{total:17,responderam:12,anonimas:13}, equipe, pessoas,
+  return {ok:true, minimo:3, atualizadoEm:new Date().toISOString(), competencias:comps, adesao:{total:17,responderam:12,anonimas:13,pessoas:['Carlos Maykon','Eduarda Pinto','Emanoel Carlos','Elana Dantas','Leandro Silva','Luiz Victor','Thalison Roberto','Udo Dirck','Yuri Ramon','Brenda Rommaneli','Bruno Max','José Sérgio','Jefferson Rafael','Maria Vitória','João Paulo','José Heverton','Edmilson Barbosa'].map((n,i)=>({nome:n,respondeu:i<12}))}, equipe, pessoas,
+    lideres:[
+     {nome:'Netinho', papel:'Dono', recebidas:13, liberado:true, media:3.68, mediaAuto:null, autoTextos:null,
+      competencias:[['direcao','Direção e prioridades',3.9],['comunicacao','Comunicação',3.2],['escuta','Abertura e escuta',3.6],['reconhecimento','Reconhecimento',3.0],['justica','Justiça e coerência',4.1],['suporte','Suporte e estrutura',4.3]].map(([id,nome,media])=>({id,nome,media,auto:null})),
+      rotulos:{continuar:{rotulo:'Como líder, continue fazendo'},melhorar:{rotulo:'O que faria você trabalhar melhor'}},
+      continuar:['Está sempre presente na loja.','Resolve rápido quando falta material.','Trata todo mundo com respeito.'],
+      melhorar:['Avisar mudanças de escala com antecedência.','Elogiar mais quando a equipe bate meta.','Fazer reuniões curtas de alinhamento.']},
+     {nome:'Thalison Roberto', papel:'Gerente', recebidas:12, liberado:true, media:3.72, mediaAuto:4.33,
+      autoTextos:{forte:'Conheço bem a operação da loja.', melhoria:'Dar mais retorno individual para a equipe.'},
+      competencias:[['organizacao','Organização da equipe',4.0,5],['metas','Acompanhamento de metas',3.8,4],['feedback','Feedback e orientação',3.1,4],['problemas','Resolução de problemas',4.2,5],['comunicacao','Comunicação',3.4,4],['justica','Justiça e exemplo',3.8,4]].map(([id,nome,media,auto])=>({id,nome,media,auto})),
+      rotulos:{continuar:{rotulo:'Como gerente, continue fazendo'},melhorar:{rotulo:'O que ele pode fazer para apoiar mais'}},
+      continuar:['Organiza bem a escala.','Resolve conflitos com calma.','Está sempre disponível para tirar dúvidas.'],
+      melhorar:['Dar feedback individual com mais frequência.','Repassar as metas da semana para todos.','Explicar o motivo das mudanças.']}],
     empresa:{respostas:13, liberado:true, enps:Math.round((6-2)/13*100), promotores:6, neutros:5, detratores:2, histograma:hist,
       itens:[{id:'orgulho',texto:'Tenho orgulho de trabalhar na CJ Home Center.',media:4.3},{id:'clareza',texto:'Sei claramente o que se espera do meu trabalho.',media:3.6},{id:'comunicacao',texto:'A comunicação entre liderança e equipe funciona bem.',media:3.1},{id:'reconhecimento',texto:'Me sinto reconhecido(a) pelo trabalho que faço.',media:2.9}],
       melhor:['O ambiente entre a equipe é muito bom.','A variedade de produtos.','A liderança está sempre por perto.'],
