@@ -136,8 +136,8 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const iniciais = n => String(n).split(' ').filter(Boolean).slice(0,2).map(p=>p[0]).join('').toUpperCase();
 let S = null;
 
-const DEMO_INFO = { ok:true, minimo:3, textosObrigatorios:true,
-  colaboradores:['Carlos Maykon','Eduarda Pinto','Emanoel Carlos','Elana Dantas','Leandro Silva','Luiz Victor','Udo Dirck','Yuri Ramon','Brenda Rommaneli','Bruno Max','José Sérgio','Jefferson Rafael','Maria Vitória','João Paulo','José Heverton','Edmilson Barbosa'].map(n=>({nome:n})),
+const DEMO_INFO = { ok:true, minimo:3, textosObrigatorios:true, colegasPorPessoa:3,
+  colaboradores:['Carlos Maykon','Eduarda Pinto','Emanoel Carlos','Elana Dantas','Leandro Silva','Luiz Victor','Udo Dirck','Yuri Ramon','Brenda Rommaneli','Bruno Max','José Sérgio','Jefferson Rafael','Maria Vitória','João Paulo','José Heverton','Edmilson Barbosa'].map((n,i)=>({nome:n, precisa:i%3===0})),
   competencias:[
     {id:'atendimento',nome:'Atendimento ao cliente',desc:'Recebe bem, escuta e resolve a necessidade do cliente.'},
     {id:'equipe',nome:'Trabalho em equipe',desc:'Colabora, ajuda os colegas e divide responsabilidades.'},
@@ -178,7 +178,7 @@ async function apiEnviar(p){ if (DEMO){ await new Promise(r=>setTimeout(r,800));
   return (await fetch(API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(p)})).json(); }
 
 /* Rascunho salvo só neste aparelho (para não perder o progresso) e apagado ao enviar. */
-const K = 'cj360anon', KR = 'cj360anon_v3';
+const K = 'cj360anon', KR = 'cj360anon_v4';
 const salvar = () => { try{ localStorage.setItem(KR, JSON.stringify({passo:S.passo, resp:S.resp})); }catch(e){} };
 const ler = () => { try{ return JSON.parse(localStorage.getItem(KR)||'null'); }catch(e){ return null; } };
 const apagar = () => { try{ localStorage.removeItem(KR); sessionStorage.removeItem(K); }catch(e){} };
@@ -191,7 +191,7 @@ function set(path,v){ const ks=path.split('.'); const l=ks.pop(); ks.reduce((o,k
 const novoAval = () => ({notas:{}, continuar:'', melhorar:''});
 
 function montarPassos(){
-  S.passos = ['intro', ...S.info.lideres.map((_,i)=>'lider:'+i), ...S.resp.ordem.map(n=>'colega:'+n), 'empresa'];
+  S.passos = ['intro', ...S.info.lideres.map((_,i)=>'lider:'+i), 'escolher', ...S.resp.sel.map(n=>'colega:'+n), 'empresa'];
 }
 
 async function iniciar(forcar){
@@ -200,15 +200,10 @@ async function iniciar(forcar){
   try{
     const info = await apiInicio();
     if (!info.ok) throw new Error(info.erro);
-    const todos = [...info.lideres.map(l=>l.nome), ...info.colaboradores.map(c=>c.nome)];
-    S = {info, passo:0, resp:{
-      ordem: embaralhar(info.colaboradores.map(c=>c.nome)),   // ordem aleatória evita cansaço sempre nos mesmos nomes
-      pular:[], aval:Object.fromEntries(todos.map(n=>[n,novoAval()])),
+    S = {info, passo:0, resp:{sel:[], pular:[],
+      aval:Object.fromEntries(info.lideres.map(l=>[l.nome,novoAval()])),
       empresa:{enps:null, itens:{}, melhor:'', mudar:''}}};
-    const r = ler();
-    const mesmaLista = r && r.resp && Array.isArray(r.resp.ordem) &&
-      r.resp.ordem.slice().sort().join('|') === info.colaboradores.map(c=>c.nome).sort().join('|');
-    if (mesmaLista) { S.resp = r.resp; S.passo = r.passo||0; }
+    const r = ler(); if (r && r.resp && Array.isArray(r.resp.sel)) { S.resp = r.resp; S.passo = r.passo||0; }
     montarPassos(); render();
   }catch(e){
     $('#rodape').hidden = true;
@@ -253,17 +248,15 @@ function botaoPular(nome){
 }
 function blocoPessoa(nome, sub){
   const b = 'aval.'+nome, ob = S.info.textosObrigatorios !== false;
-  const pulou = (S.resp.pular||[]).includes(nome);
   return `<div class="colega" style="margin-top:6px"><div class="avatar">${esc(iniciais(nome))}</div><div><h2>${esc(nome)}</h2><p class="sub" style="margin:0">${sub}</p></div></div>
-    ${botaoPular(nome)}
-    ${pulou ? `<p class="sub" style="margin-top:14px">Etapa pulada (é você). Toque em <b>Continuar</b>.</p>` : `
+    ${`
     ${LEGENDA}${competencias(b+'.notas')}
     ${campo(b+'.continuar','<span class="pos">●</span> Continue fazendo',(ob?'':'Opcional · ')+'O que essa pessoa faz bem e deve manter.','Ex.: Sempre ajuda no atendimento quando a loja está cheia.',ob)}
     ${campo(b+'.melhorar','<span class="neg">●</span> Pode melhorar',(ob?'':'Opcional · ')+'Um comportamento concreto que faria diferença. Seja construtivo.','Ex.: Avisar com antecedência quando for se atrasar.',ob)}`}`;
 }
 
 function render(){
-  const p = S.passos[S.passo], I = S.info, nCol = S.resp.ordem.length;
+  const p = S.passos[S.passo], I = S.info, N = I.colegasPorPessoa || 3, nSel = S.resp.sel.length;
   $('#rodape').hidden = false; $('#msg').textContent = '';
   $('#progresso').style.width = (S.passo/S.passos.length*100) + '%';
   $('#voltar').style.visibility = S.passo===0 ? 'hidden' : 'visible';
@@ -273,15 +266,14 @@ function render(){
   if (p==='intro'){
     app.innerHTML = `<div class="card">${selo}
       <h1>Avaliação da equipe e da CJ</h1>
-      <p class="sub">Aqui você avalia <b>toda a equipe</b>: a liderança (${I.lideres.map(l=>`<b>${esc(l.nome.split(' ')[0])}</b>`).join(' e ')}), <b>todos os colegas</b> e, no final, a <b>empresa</b>.</p>
+      <p class="sub">Aqui você avalia <b>toda a equipe</b>: a liderança (${I.lideres.map(l=>`<b>${esc(l.nome.split(' ')[0])}</b>`).join(' e ')}), <b>${N} colegas</b> que você escolhe e, no final, a <b>empresa</b>.</p>
       <div class="aviso"><strong>Esta avaliação é anônima de verdade.</strong>
         <ul style="margin:8px 0 0;padding-left:18px">
           <li>O link é o mesmo para toda a equipe: não tem código nem pede seu nome.</li>
           <li>As respostas são gravadas sem data e fora de ordem.</li>
           <li>Os resultados de cada pessoa só aparecem depois de ${I.minimo} avaliações, sempre agrupados.</li>
         </ul></div>
-      <p class="dica"><b>Quando chegar no seu próprio nome</b>, marque "Eu sou…" para pular. A sua autoavaliação é feita no seu link pessoal.</p>
-      <p class="dica">Seja sincero e respeitoso: fale de atitudes, não da pessoa. "Ajuda os colegas quando a loja enche" vale mais que "é legal". Cada pessoa leva cerca de 1 a 2 minutos, e o progresso fica salvo neste aparelho se você precisar parar.</p>
+      <p class="dica">Seja sincero e respeitoso: fale de atitudes, não da pessoa. "Ajuda os colegas quando a loja enche" vale mais que "é legal". Leva cerca de 10 minutos, e o progresso fica salvo neste aparelho se você precisar parar.</p>
     </div>`;
   }
   else if (p.startsWith('lider:')){
@@ -297,9 +289,18 @@ function render(){
       ${campo(b+'.melhorar','<span class="neg">●</span> '+esc(T.melhorar?.rotulo||'Pode melhorar'), esc(T.melhorar?.ajuda||''),'Ex.: Avisar a equipe com antecedência sobre mudanças de escala.')}`}
     </div>`;
   }
+  else if (p==='escolher'){
+    const lista = I.colaboradores.slice().sort((a,b)=>(b.precisa-a.precisa)||a.nome.localeCompare(b.nome,'pt-BR'));
+    app.innerHTML = `<div class="card" data-req="__sel">${selo}<div class="etapa">Colegas</div>
+      <h2>Escolha ${N} colegas para avaliar</h2>
+      <p class="sub">Marque <b>${N} colegas com quem você trabalha</b> no dia a dia. <b>Não marque o seu próprio nome.</b> Os que estão no topo, marcados com <span style="color:#9A5B00;font-weight:700">precisam de avaliações</span>, receberam menos respostas até agora: dê preferência a eles, se trabalha com eles.</p>
+      <ul class="lista-col">${lista.map(c=>{ const on = S.resp.sel.includes(c.nome), cheio = !on && nSel>=N;
+        return `<li><label class="${on?'on':''}" style="${cheio?'opacity:.45':''}"><input type="checkbox" value="${esc(c.nome)}" ${on?'checked':''} ${cheio?'disabled':''}><span>${esc(c.nome)}${c.precisa?'<small>precisa de avaliações</small>':''}</span></label></li>`; }).join('')}</ul>
+      <div class="contador">${nSel} de ${N} selecionados</div></div>`;
+  }
   else if (p.startsWith('colega:')){
-    const nome = p.slice(7), i = S.resp.ordem.indexOf(nome);
-    app.innerHTML = `<div class="card">${selo}<div class="etapa">Colega ${i+1} de ${nCol}</div>${blocoPessoa(nome,'Pense no dia a dia de trabalho com essa pessoa.')}</div>`;
+    const nome = p.slice(7), i = S.resp.sel.indexOf(nome);
+    app.innerHTML = `<div class="card">${selo}<div class="etapa">Colega ${i+1} de ${nSel}</div>${blocoPessoa(nome,'Pense no dia a dia de trabalho com essa pessoa.')}</div>`;
   }
   else if (p==='empresa'){
     app.innerHTML = `<div class="card">${selo}<div class="etapa">Sobre a empresa</div>
@@ -318,7 +319,12 @@ function render(){
 
 app.addEventListener('change', ev => {
   const cb = ev.target; if (cb.type!=='checkbox') return;
-  if (cb.id!=='pular') return;
+  if (cb.id!=='pular'){
+    const nome = cb.value, N = S.info.colegasPorPessoa || 3;
+    let sel = S.resp.sel.filter(n=>n!==nome);
+    if (cb.checked){ if (sel.length>=N){ cb.checked=false; return; } sel.push(nome); if (!S.resp.aval[nome]) S.resp.aval[nome] = novoAval(); }
+    S.resp.sel = sel; const y = scrollY; salvar(); montarPassos(); render(); window.scrollTo(0,y); return;
+  }
   const n = cb.dataset.nome, antes = (S.resp.pular||[])[0];
   if (cb.checked && antes && antes!==n){
     // só é possível pular uma pessoa (você mesmo)
@@ -336,6 +342,11 @@ app.addEventListener('click', ev => {
 app.addEventListener('input', ev => { const t=ev.target; if (t.tagName==='TEXTAREA'&&t.dataset.path){ set(t.dataset.path,t.value); t.classList.remove('invalido'); } });
 
 function validar(){
+  if (S.passos[S.passo]==='escolher'){
+    const N = S.info.colegasPorPessoa || 3;
+    if (S.resp.sel.length === N) return true;
+    $('#msg').textContent = `Escolha ${N} colegas (faltam ${N-S.resp.sel.length}).`; return false;
+  }
   const pend = [...app.querySelectorAll('[data-req]')].filter(el => { const v=get(el.dataset.req);
     return el.tagName==='TEXTAREA' ? String(v||'').trim().length<3 : (v===undefined||v===null||v===''); });
   app.querySelectorAll('.invalido').forEach(e=>e.classList.remove('invalido'));
@@ -351,7 +362,7 @@ $('#avancar').onclick = async () => {
   const btn=$('#avancar'); btn.disabled=true; btn.textContent='Enviando…';
   const R = S.resp;
   const pular = R.pular || [];
-  const alvos = [...S.info.lideres.map(l=>l.nome), ...R.ordem].filter(n=>!pular.includes(n));
+  const alvos = [...S.info.lideres.map(l=>l.nome).filter(n=>!pular.includes(n)), ...R.sel];
   const payload = { tipo:'anonimo', pular,
     avaliacoes: alvos.map(n=>({avaliado:n, notas:R.aval[n].notas, continuar:R.aval[n].continuar, melhorar:R.aval[n].melhorar})),
     empresa: R.empresa };
