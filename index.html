@@ -1,4 +1,4 @@
-<!doctype html> 
+<!doctype html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -91,6 +91,8 @@
   .lista-col label.on{border-color:var(--verde);background:var(--verde-cl)}
   .lista-col small{display:block;font-size:11px;font-weight:600;color:#9A5B00}
   .contador{font-size:13px;font-weight:700;color:var(--verde);margin-top:12px}
+  .pular{display:flex;align-items:center;gap:10px;margin-top:14px;font-size:13.5px;font-weight:600;color:var(--suave);background:var(--fundo);border-radius:10px;padding:10px 12px;cursor:pointer}
+  .pular input{width:18px;height:18px;accent-color:var(--azul)}
 </style>
 </head>
 <body>
@@ -134,8 +136,8 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt
 const iniciais = n => String(n).split(' ').filter(Boolean).slice(0,2).map(p=>p[0]).join('').toUpperCase();
 let S = null;
 
-const DEMO_INFO = { ok:true, dono:'Netinho', minColegas:2, minimo:3,
-  colaboradores:['Carlos Maykon','Eduarda Pinto','Emanoel Carlos','Elana Dantas','Leandro Silva','Luiz Victor','Thalison Roberto','Udo Dirck','Yuri Ramon','Brenda Rommaneli','Bruno Max','José Sérgio','Jefferson Rafael','Maria Vitória','João Paulo','José Heverton','Edmilson Barbosa'].map((n,i)=>({nome:n, precisa:i%4===0})),
+const DEMO_INFO = { ok:true, minColegas:2, minimo:3,
+  colaboradores:['Carlos Maykon','Eduarda Pinto','Emanoel Carlos','Elana Dantas','Leandro Silva','Luiz Victor','Udo Dirck','Yuri Ramon','Brenda Rommaneli','Bruno Max','José Sérgio','Jefferson Rafael','Maria Vitória','João Paulo','José Heverton','Edmilson Barbosa'].map((n,i)=>({nome:n, precisa:i%4===0})),
   competencias:[
     {id:'atendimento',nome:'Atendimento ao cliente',desc:'Recebe bem, escuta e resolve a necessidade do cliente.'},
     {id:'equipe',nome:'Trabalho em equipe',desc:'Colabora, ajuda os colegas e divide responsabilidades.'},
@@ -143,6 +145,27 @@ const DEMO_INFO = { ok:true, dono:'Netinho', minColegas:2, minimo:3,
     {id:'comunicacao',nome:'Comunicação',desc:'Se expressa com clareza e respeito e repassa informações.'},
     {id:'proatividade',nome:'Proatividade',desc:'Antecipa problemas e age sem precisar ser cobrado.'},
     {id:'conhecimento',nome:'Conhecimento técnico',desc:'Domina produtos, processos e sistemas da loja.'}],
+  lideres:[
+    {nome:'Netinho',papel:'Dono',colaborador:false,
+     competencias:[
+      {id:'direcao',nome:'Direção e prioridades',desc:'Deixa claro para onde a loja vai, quais são as metas e o que é prioridade.'},
+      {id:'comunicacao',nome:'Comunicação',desc:'Informa decisões e mudanças com clareza, no tempo certo e para todos.'},
+      {id:'escuta',nome:'Abertura e escuta',desc:'Está acessível, ouve sugestões e críticas e considera a opinião da equipe.'},
+      {id:'reconhecimento',nome:'Reconhecimento',desc:'Valoriza e reconhece o bom trabalho de cada pessoa.'},
+      {id:'justica',nome:'Justiça e coerência',desc:'Trata todos com respeito, aplica as mesmas regras e age de acordo com o que fala.'},
+      {id:'suporte',nome:'Suporte e estrutura',desc:'Garante condições, ferramentas e apoio para a equipe trabalhar bem.'}],
+     textos:{continuar:{rotulo:'Como líder, continue fazendo',ajuda:'Uma atitude do Netinho que faz bem à equipe e deve ser mantida.'},
+       melhorar:{rotulo:'O que faria você trabalhar melhor',ajuda:'Algo que ele poderia fazer diferente para apoiar mais a equipe.'}}},
+    {nome:'Thalison Roberto',papel:'Gerente',colaborador:true,
+     competencias:[
+      {id:'organizacao',nome:'Organização da equipe',desc:'Distribui tarefas, escalas e funções de forma clara e equilibrada.'},
+      {id:'metas',nome:'Acompanhamento de metas',desc:'Acompanha os resultados e orienta a equipe para atingir as metas.'},
+      {id:'feedback',nome:'Feedback e orientação',desc:'Dá retorno sobre o trabalho, ensina e corrige com respeito.'},
+      {id:'problemas',nome:'Resolução de problemas',desc:'Resolve conflitos e imprevistos com rapidez e bom senso.'},
+      {id:'comunicacao',nome:'Comunicação',desc:'Repassa informações e decisões com clareza para todos.'},
+      {id:'justica',nome:'Justiça e exemplo',desc:'Trata todos de forma igual e é referência de postura e comprometimento.'}],
+     textos:{continuar:{rotulo:'Como gerente, continue fazendo',ajuda:'Uma atitude do Thalison que ajuda a equipe e deve ser mantida.'},
+       melhorar:{rotulo:'O que ele pode fazer para apoiar mais',ajuda:'Algo concreto que faria a gestão do dia a dia funcionar melhor.'}}}],
   itensEmpresa:[
     {id:'orgulho',texto:'Tenho orgulho de trabalhar na CJ Home Center.'},
     {id:'clareza',texto:'Sei claramente o que se espera do meu trabalho.'},
@@ -167,7 +190,7 @@ function set(path,v){ const ks=path.split('.'); const l=ks.pop(); ks.reduce((o,k
 const novoAval = () => ({notas:{}, continuar:'', melhorar:''});
 
 function montarPassos(){
-  S.passos = ['intro','dono','escolher', ...S.resp.sel.map(n=>'colega:'+n), 'empresa'];
+  S.passos = ['intro', ...S.info.lideres.map((_,i)=>'lider:'+i), 'escolher', ...S.resp.sel.map(n=>'colega:'+n), 'empresa'];
 }
 
 async function iniciar(forcar){
@@ -176,7 +199,7 @@ async function iniciar(forcar){
   try{
     const info = await apiInicio();
     if (!info.ok) throw new Error(info.erro);
-    S = {info, passo:0, resp:{sel:[], aval:{[info.dono]:novoAval()}, empresa:{enps:null, itens:{}, melhor:'', mudar:''}}};
+    S = {info, passo:0, resp:{sel:[], pular:[], aval:Object.fromEntries(info.lideres.map(l=>[l.nome,novoAval()])), empresa:{enps:null, itens:{}, melhor:'', mudar:''}}};
     const r = ler(); if (r && r.resp && r.resp.aval) { S.resp = r.resp; S.passo = r.passo||0; }
     montarPassos(); render();
   }catch(e){
@@ -209,8 +232,8 @@ function escala(path, o){
   if (naoSei) h += `<button type="button" class="ns ${v===0?'on':''}" data-v="0">Não sei</button>`;
   return h + '</div>';
 }
-function competencias(base){
-  return S.info.competencias.map(c=>`<div class="q" data-req="${esc(base+'.'+c.id)}"><div class="q-t">${esc(c.nome)}</div><div class="q-d">${esc(c.desc)}</div>${escala(base+'.'+c.id,{naoSei:true})}</div>`).join('');
+function competencias(base, lista){
+  return (lista || S.info.competencias).map(c=>`<div class="q" data-req="${esc(base+'.'+c.id)}"><div class="q-t">${esc(c.nome)}</div><div class="q-d">${esc(c.desc)}</div>${escala(base+'.'+c.id,{naoSei:true})}</div>`).join('');
 }
 function campo(path, rot, ajuda, ph, obrig=true){
   return `<label class="campo">${rot}<span class="ajuda">${ajuda}</span></label>
@@ -235,7 +258,7 @@ function render(){
   if (p==='intro'){
     app.innerHTML = `<div class="card">${selo}
       <h1>Avaliação da equipe e da CJ</h1>
-      <p class="sub">Aqui você avalia o <b>${esc(I.dono)}</b>, os <b>colegas com quem trabalha</b> e a <b>empresa</b>.</p>
+      <p class="sub">Aqui você avalia a <b>liderança</b> (${I.lideres.map(l=>`<b>${esc(l.nome.split(' ')[0])}</b>`).join(' e ')}), os <b>colegas com quem trabalha</b> e a <b>empresa</b>.</p>
       <div class="aviso"><strong>Esta avaliação é anônima de verdade.</strong>
         <ul style="margin:8px 0 0;padding-left:18px">
           <li>O link é o mesmo para toda a equipe: não tem código nem pede seu nome.</li>
@@ -245,8 +268,18 @@ function render(){
       <p class="dica">Seja sincero e respeitoso: fale de atitudes, não da pessoa. "Ajuda os colegas quando a loja enche" vale mais que "é legal". Cada pessoa avaliada leva cerca de 1 minuto.</p>
     </div>`;
   }
-  else if (p==='dono'){
-    app.innerHTML = `<div class="card">${selo}<div class="etapa">Liderança</div>${blocoPessoa(I.dono,'Avaliação obrigatória para toda a equipe.')}</div>`;
+  else if (p.startsWith('lider:')){
+    const L = I.lideres[Number(p.slice(6))], b = 'aval.'+L.nome, T = L.textos || {};
+    const primeiro = L.nome.split(' ')[0], pulou = (S.resp.pular||[]).includes(L.nome);
+    app.innerHTML = `<div class="card">${selo}<div class="etapa">Liderança · ${esc(L.papel)}</div>
+      <div class="colega" style="margin-top:6px"><div class="avatar">${esc(iniciais(L.nome))}</div><div><h2>${esc(L.nome)}</h2><p class="sub" style="margin:0">Avalie o ${esc(primeiro)} como <b>${esc(L.papel.toLowerCase())}</b> da CJ. Todos da equipe respondem esta parte.</p></div></div>
+      ${L.colaborador ? `<label class="pular"><input type="checkbox" id="pular" data-nome="${esc(L.nome)}" ${pulou?'checked':''}> Eu sou o ${esc(primeiro)}: pular esta etapa</label>` : ''}
+      ${pulou ? `<p class="sub" style="margin-top:14px">Etapa pulada. Toque em <b>Continuar</b>.</p>` : `
+      <div class="legenda"><span><b>1</b> Muito abaixo</span><span><b>3</b> Adequado</span><span><b>5</b> Excelente</span></div>
+      ${competencias(b+'.notas', L.competencias)}
+      ${campo(b+'.continuar','<span class="pos">●</span> '+esc(T.continuar?.rotulo||'Continue fazendo'), esc(T.continuar?.ajuda||''),'Ex.: Está sempre presente e ajuda a resolver os problemas na hora.')}
+      ${campo(b+'.melhorar','<span class="neg">●</span> '+esc(T.melhorar?.rotulo||'Pode melhorar'), esc(T.melhorar?.ajuda||''),'Ex.: Avisar a equipe com antecedência sobre mudanças de escala.')}`}
+    </div>`;
   }
   else if (p==='escolher'){
     const lista = I.colaboradores.slice().sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
@@ -284,6 +317,7 @@ function atualizarContador(){
 
 app.addEventListener('change', ev => {
   const cb = ev.target; if (cb.type!=='checkbox') return;
+  if (cb.id==='pular'){ const n = cb.dataset.nome; S.resp.pular = cb.checked ? [n] : []; salvar(); render(); return; }
   const nome = cb.value; let sel = S.resp.sel.filter(n=>n!==nome);
   if (cb.checked){ sel.push(nome); if (!S.resp.aval[nome]) S.resp.aval[nome] = novoAval(); }
   S.resp.sel = sel.sort((a,b)=>a.localeCompare(b,'pt-BR'));
@@ -320,8 +354,9 @@ $('#avancar').onclick = async () => {
   if (S.passo < S.passos.length-1){ S.passo++; salvar(); render(); return; }
   const btn=$('#avancar'); btn.disabled=true; btn.textContent='Enviando…';
   const R = S.resp;
-  const alvos = [S.info.dono, ...R.sel];
-  const payload = { tipo:'anonimo',
+  const pular = R.pular || [];
+  const alvos = [...S.info.lideres.map(l=>l.nome).filter(n=>!pular.includes(n)), ...R.sel];
+  const payload = { tipo:'anonimo', pular,
     avaliacoes: alvos.map(n=>({avaliado:n, notas:R.aval[n].notas, continuar:R.aval[n].continuar, melhorar:R.aval[n].melhorar})),
     empresa: R.empresa };
   try{
