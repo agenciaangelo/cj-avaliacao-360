@@ -1,4 +1,4 @@
-<!doctype html>
+<!doctype html> 
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -165,7 +165,7 @@ async function iniciar(codigo){
     if (!info.ok) return telaCodigo(info.erro);
     if (info.jaRespondeu) return telaFim(info.urlGeral, 'Sua autoavaliação já foi registrada.');
     S = {codigo:String(codigo).toUpperCase(), info, passo:0, resp:{notas:{}, forte:'', melhoria:''}};
-    const r = ler(); if (r && r.resp) { S.resp = r.resp; S.passo = r.passo||0; }
+    const r = ler(); if (r && r.resp) { S.resp = r.resp; } // mantém as respostas, mas sempre abre na tela inicial
     render();
   }catch(e){ telaCodigo('Não foi possível conectar. Verifique sua internet e tente novamente.'); }
 }
@@ -183,7 +183,7 @@ function telaFim(urlGeral, titulo){
   $('#rodape').hidden = true; $('#progresso').style.width = '100%';
   app.innerHTML = `<div class="card centro"><div class="ok">✓</div>
     <h1>${esc(titulo)}</h1>
-    <p class="sub">Falta a segunda parte: avaliar o Netinho, o Thalison, 3 colegas que você escolhe e a CJ.</p>
+    <p class="sub">Falta a segunda parte: avaliar o Netinho, o Thalison, todos os colegas e a CJ.</p>
     <div class="aviso" style="text-align:left"><strong>A segunda parte é 100% anônima.</strong> Ela usa um link diferente, igual para toda a equipe, sem código e sem seu nome. Não há como saber quem respondeu o quê.</div>
     <a class="btn pri link" href="${esc(urlGeral||'./')}">Ir para a parte anônima →</a></div>`;
 }
@@ -210,7 +210,7 @@ function render(){
       <p class="sub">A Avaliação 360° da CJ tem <b>duas partes</b>, em links separados:</p>
       <ul class="passos">
         <li><b>1</b><div><strong>Autoavaliação: este link</strong><br><span class="sub">Como você enxerga o seu trabalho. É identificada, porque o objetivo é comparar como você se vê com como a equipe te vê. Leva uns 3 minutos.</span></div></li>
-        <li><b>2</b><div><strong>Avaliação da equipe e da CJ: link anônimo</strong><br><span class="sub">Você avalia o Netinho, o Thalison, 3 colegas que você escolhe e a empresa. Esse link é igual para todos, sem código e sem nome.</span></div></li>
+        <li><b>2</b><div><strong>Avaliação da equipe e da CJ: link anônimo</strong><br><span class="sub">Você avalia o Netinho, o Thalison, todos os colegas e a empresa. Esse link é igual para todos, sem código e sem nome.</span></div></li>
       </ul>
       <div class="aviso"><strong>Por que este link tem código?</strong> Só para registrar a sua autoavaliação no seu nome. Ele não tem nenhuma ligação com a parte anônima.</div>
     </div>`;
