@@ -1,4 +1,4 @@
-<!doctype html> 
+<!doctype html>
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
@@ -206,7 +206,7 @@ function render(){
       <th data-o="nome">Colaborador${seta('nome')}</th>
       ${comps.map(c=>`<th data-o="${c.id}" title="${esc(c.nome)}">${esc(c.nome.split(' ')[0])}${seta(c.id)}</th>`).join('')}
       <th data-o="media">Média${seta('media')}</th><th>Auto</th></tr></thead><tbody>
-    ${linhas.map(p=>`<tr data-p="${esc(p.nome)}"><td class="nome">${esc(p.nome)}${p.dono?' <span style="font-size:10.5px;color:var(--azul);font-weight:700">· DONO</span>':''}</td>
+    ${linhas.map(p=>`<tr data-p="${esc(p.nome)}"><td class="nome">${esc(p.nome)} <span style="color:var(--azul);font-weight:700">›</span></td>
       ${p.liberado
         ? comps.map(c=>`<td style="${corNota(p.outros[c.id])}">${f1(p.outros[c.id])}</td>`).join('') + `<td style="${corNota(p.mediaOutros)}">${f1(p.mediaOutros)}</td>`
         : `<td class="lock" colspan="${comps.length+1}">🔒 aguardando avaliações (${p.recebidas}/${d.minimo})</td>`}
@@ -268,7 +268,7 @@ function render(){
       <div class="card kpi"><small>eNPS</small><b>${E.liberado?(E.enps>0?'+':'')+E.enps:'—'}</b><span>${E.liberado?zonaENPS(E.enps)[0]:'aguardando respostas'}</span></div>
       <div class="card kpi"><small>Respostas anônimas</small><b>${d.adesao.anonimas}</b><span>${totalAval} avaliações de pessoas${d.adesao.anonimas>d.adesao.total?' · ⚠ acima do nº de colaboradores':''}</span></div>
     </div>
-    <section class="card"><h3>Adesão</h3><p class="sub">Autoavaliações concluídas (link pessoal). O link anônimo não identifica quem respondeu: ${d.adesao.anonimas} de ${d.adesao.total} respostas até agora.</p>
+    <section class="card"><h3>Adesão</h3><p class="sub">Autoavaliações concluídas (link pessoal). O link anônimo não identifica quem respondeu: ${d.adesao.anonimas} de ${d.adesao.total} respostas até agora.${(d.adesao.naoRespondem||[]).length?` Não respondem (continuam sendo avaliados): ${d.adesao.naoRespondem.map(esc).join(', ')}.`:''}</p>
       <div class="bar"><i style="width:${pct}%"></i></div>
       <div class="chips">${adesaoPessoas.slice().sort((a,b)=>b.respondeu-a.respondeu||a.nome.localeCompare(b.nome)).map(p=>`<span class="chip ${p.respondeu?'ok':''}">${p.respondeu?'✓ ':''}${esc(p.nome)}</span>`).join('')}</div>
     </section>
@@ -276,7 +276,7 @@ function render(){
       <div class="card"><h3>Competências da equipe</h3><p class="sub">Como a equipe se vê × como os colegas avaliam</p><div style="height:300px"><canvas id="cEquipe"></canvas></div></div>
       <div class="card"><h3>Destaques automáticos</h3><p class="sub">Leitura rápida para a liderança</p><ul class="insights">${ins.join('')}</ul></div>
     </section>
-    <section class="card"><h3>Mapa por colaborador</h3><p class="sub">Média dos colegas por competência · clique no nome para ver o detalhe e os comentários · clique no título da coluna para ordenar</p>
+    <section class="card"><h3>Mapa por colaborador</h3><p class="sub">Média dos colegas por competência · <b style="color:var(--azul)">clique no nome para ver os comentários</b> (continue fazendo / pode melhorar) e o comparativo com a autoavaliação · clique no título da coluna para ordenar</p>
       <div class="tabela">${tabela}</div></section>
     ${lideresHTML}
     <section><h3 style="margin:22px 0 10px;font-size:18px">Clima e marca empregadora</h3>${empresaHTML}</section>`;
